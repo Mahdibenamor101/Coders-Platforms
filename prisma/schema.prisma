@@ -1,0 +1,197 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// SQLite has no native enum support in Prisma, so status/category/type fields
+// below are plain strings. The allowed values are enforced at the application
+// layer (see src/lib/enums.ts and src/lib/validation.ts).
+
+model Company {
+  id                       String   @id @default(cuid())
+  name                     String
+  whatsappPhoneNumberId    String?
+  whatsappAccessToken      String?
+  whatsappTestRecipient    String?
+  createdAt                DateTime @default(now())
+  updatedAt                DateTime @updatedAt
+
+  users             User[]
+  drivers           Driver[]
+  tractors          Tractor[]
+  trailers          Trailer[]
+  trips             Trip[]
+  maintenanceRecords MaintenanceRecord[]
+  recommendations   Recommendation[]
+  whatsappMessages  WhatsAppMessage[]
+}
+
+model User {
+  id           String   @id @default(cuid())
+  companyId    String
+  company      Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  email        String   @unique
+  passwordHash String
+  name         String
+  role         String   @default("ADMIN")
+  createdAt    DateTime @default(now())
+
+  @@index([companyId])
+}
+
+model Driver {
+  id            String       @id @default(cuid())
+  companyId     String
+  company       Company      @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  firstName     String
+  lastName      String
+  phone         String
+  licenseNumber String
+  licenseExpiry DateTime
+  status        String       @default("ACTIVE")
+  hireDate      DateTime?
+  notes         String?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  trips Trip[]
+
+  @@index([companyId])
+}
+
+model Tractor {
+  id                       String        @id @default(cuid())
+  companyId                String
+  company                  Company       @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  plateNumber              String
+  brand                    String
+  model                    String
+  year                     Int?
+  mileage                  Int           @default(0)
+  status                   String        @default("AVAILABLE")
+  lastMaintenanceDate      DateTime?
+  lastMaintenanceMileage   Int?
+  nextMaintenanceMileage   Int?
+  insuranceExpiry          DateTime?
+  technicalControlExpiry  DateTime?
+  notes                    String?
+  createdAt                DateTime      @default(now())
+  updatedAt                DateTime      @updatedAt
+
+  trips              Trip[]
+  maintenanceRecords  MaintenanceRecord[]
+
+  @@index([companyId])
+}
+
+model Trailer {
+  id                  String        @id @default(cuid())
+  companyId           String
+  company             Company       @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  plateNumber         String
+  type                String        @default("CURTAIN")
+  capacityTons        Float?
+  status              String        @default("AVAILABLE")
+  lastInspectionDate  DateTime?
+  nextInspectionDate  DateTime?
+  insuranceExpiry     DateTime?
+  notes               String?
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+
+  trips              Trip[]
+  maintenanceRecords  MaintenanceRecord[]
+
+  @@index([companyId])
+}
+
+model Trip {
+  id                  String     @id @default(cuid())
+  companyId           String
+  company              Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  tractorId            String
+  tractor              Tractor   @relation(fields: [tractorId], references: [id])
+  trailerId            String?
+  trailer              Trailer?  @relation(fields: [trailerId], references: [id])
+  driverId             String
+  driver               Driver    @relation(fields: [driverId], references: [id])
+  origin               String
+  destination           String
+  departureAt           DateTime
+  estimatedArrivalAt    DateTime?
+  actualArrivalAt       DateTime?
+  status                String    @default("PLANNED")
+  cargoDescription      String?
+  distanceKm            Float?
+  driverNotifiedAt      DateTime?
+  createdAt             DateTime   @default(now())
+  updatedAt             DateTime   @updatedAt
+
+  @@index([companyId])
+  @@index([tractorId])
+  @@index([trailerId])
+  @@index([driverId])
+}
+
+model MaintenanceRecord {
+  id            String          @id @default(cuid())
+  companyId     String
+  company       Company         @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  tractorId     String?
+  tractor       Tractor?        @relation(fields: [tractorId], references: [id])
+  trailerId     String?
+  trailer       Trailer?        @relation(fields: [trailerId], references: [id])
+  type          String          @default("OTHER")
+  performedAt   DateTime
+  mileage       Int?
+  cost          Float?
+  notes         String?
+  nextDueAt     DateTime?
+  nextDueMileage Int?
+  createdAt     DateTime        @default(now())
+
+  @@index([companyId])
+  @@index([tractorId])
+  @@index([trailerId])
+}
+
+model Recommendation {
+  id          String    @id @default(cuid())
+  companyId   String
+  company     Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  entityType  String
+  entityId    String
+  entityLabel String
+  severity    String    @default("INFO")
+  category    String
+  title       String
+  message     String
+  dueAt       DateTime?
+  resolved    Boolean   @default(false)
+  resolvedAt  DateTime?
+  createdAt   DateTime  @default(now())
+
+  @@index([companyId])
+  @@unique([companyId, entityType, entityId, category, title])
+}
+
+model WhatsAppMessage {
+  id                 String    @id @default(cuid())
+  companyId          String
+  company             Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  driverId            String?
+  toPhone             String
+  type                String    @default("CUSTOM")
+  body                String
+  status              String    @default("PENDING")
+  providerMessageId   String?
+  errorMessage        String?
+  createdAt           DateTime  @default(now())
+
+  @@index([companyId])
+  @@index([driverId])
+}
