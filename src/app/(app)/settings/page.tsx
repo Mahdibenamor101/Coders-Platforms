@@ -24,8 +24,15 @@ export default async function SettingsPage() {
           whatsappPhoneNumberId: company.whatsappPhoneNumberId ?? "",
           whatsappAccessToken: company.whatsappAccessToken ?? "",
           whatsappTestRecipient: company.whatsappTestRecipient ?? "",
+          depotAddress: company.depotAddress ?? "",
         }}
       />
+      {!company.depotLat && company.depotAddress && (
+        <div className="rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-700">
+          L&apos;adresse du depot n&apos;a pas pu etre localisee automatiquement. Verifiez son orthographe
+          et enregistrez a nouveau.
+        </div>
+      )}
 
       <div className="card p-6">
         <div className="mb-4 flex items-center justify-between">

@@ -18,17 +18,22 @@
   },
   "dependencies": {
     "@prisma/client": "^5.20.0",
+    "@zxing/browser": "^0.1.5",
+    "@zxing/library": "^0.21.3",
     "bcryptjs": "^2.4.3",
     "date-fns": "^3.6.0",
     "jose": "^5.9.6",
+    "leaflet": "^1.9.4",
     "next": "14.2.35",
     "react": "^18",
     "react-dom": "^18",
+    "react-leaflet": "^4.2.1",
     "recharts": "^2.12.7",
     "zod": "^3.23.8"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",
+    "@types/leaflet": "^1.9.12",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",

@@ -19,6 +19,8 @@ function parseTractorForm(formData: FormData) {
     insuranceExpiry: formData.get("insuranceExpiry") ?? "",
     technicalControlExpiry: formData.get("technicalControlExpiry") ?? "",
     notes: formData.get("notes") ?? "",
+    costPerKm: formData.get("costPerKm") || undefined,
+    hazmatCertified: formData.get("hazmatCertified") === "on",
   });
 }
 
@@ -45,6 +47,8 @@ export async function createTractorAction(_prev: FormState, formData: FormData):
         ? new Date(data.technicalControlExpiry)
         : null,
       notes: data.notes || null,
+      costPerKm: data.costPerKm ?? null,
+      hazmatCertified: data.hazmatCertified,
     },
   });
 
@@ -79,6 +83,8 @@ export async function updateTractorAction(
         ? new Date(data.technicalControlExpiry)
         : null,
       notes: data.notes || null,
+      costPerKm: data.costPerKm ?? null,
+      hazmatCertified: data.hazmatCertified,
     },
   });
 

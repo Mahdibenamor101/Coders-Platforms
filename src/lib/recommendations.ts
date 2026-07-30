@@ -42,7 +42,7 @@ export async function generateRecommendationsForCompany(companyId: string) {
     prisma.trailer.findMany({ where: { companyId } }),
     prisma.trip.findMany({
       where: { companyId, status: { in: ["PLANNED", "IN_PROGRESS"] } },
-      include: { driver: true, tractor: true, trailer: true },
+      include: { driver: true, tractor: true, trailer: true, orders: true },
     }),
   ]);
 
@@ -252,6 +252,36 @@ export async function generateRecommendationsForCompany(companyId: string) {
           dueAt: trip.departureAt,
         });
       }
+    }
+
+    const activeOrders = trip.orders.filter((o) => o.status !== "CANCELLED" && o.status !== "FAILED");
+
+    for (const order of activeOrders) {
+      if (order.hazmat && !trip.tractor.hazmatCertified) {
+        drafts.push({
+          entityType: "ORDER",
+          entityId: order.id,
+          entityLabel: `${order.reference} (${trip.tractor.plateNumber})`,
+          severity: "CRITICAL",
+          category: "COMPLIANCE",
+          title: "Matiere dangereuse sur tracteur non certifie",
+          message: `La commande ${order.reference} (matiere dangereuse) est assignee au tracteur ${trip.tractor.plateNumber} qui n'est pas certifie ADR. Reassignez-la a un tracteur certifie.`,
+        });
+      }
+    }
+
+    const totalWeightKg = activeOrders.reduce((sum, o) => sum + (o.weightKg ?? 0), 0);
+    const capacityKg = trip.trailer?.capacityTons != null ? trip.trailer.capacityTons * 1000 : null;
+    if (capacityKg != null && totalWeightKg > capacityKg) {
+      drafts.push({
+        entityType: "TRIP",
+        entityId: trip.id,
+        entityLabel: label,
+        severity: "CRITICAL",
+        category: "COMPLIANCE",
+        title: "Surcharge de la remorque",
+        message: `La tournee ${label} totalise ${totalWeightKg.toLocaleString("fr-FR")} kg pour une capacite de ${capacityKg.toLocaleString("fr-FR")} kg (remorque ${trip.trailer?.plateNumber}). Retirez ou reassignez des commandes.`,
+      });
     }
   }
 

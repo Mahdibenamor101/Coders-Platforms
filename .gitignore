@@ -33,6 +33,9 @@ yarn-error.log*
 /prisma/*.db
 /prisma/*.db-journal
 
+# driver proof-of-delivery photo uploads (runtime data, not source)
+/public/uploads/
+
 # vercel
 .vercel
 

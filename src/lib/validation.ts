@@ -21,6 +21,8 @@ export const driverSchema = z.object({
   status: z.enum(["ACTIVE", "ON_LEAVE", "SUSPENDED"]).default("ACTIVE"),
   hireDate: z.string().optional().or(z.literal("")),
   notes: z.string().optional().or(z.literal("")),
+  skills: z.string().optional().or(z.literal("")),
+  costPerKm: z.coerce.number().optional(),
 });
 
 export const tractorSchema = z.object({
@@ -33,6 +35,8 @@ export const tractorSchema = z.object({
   nextMaintenanceMileage: z.coerce.number().int().optional(),
   insuranceExpiry: z.string().optional().or(z.literal("")),
   technicalControlExpiry: z.string().optional().or(z.literal("")),
+  costPerKm: z.coerce.number().optional(),
+  hazmatCertified: z.coerce.boolean().default(false),
   notes: z.string().optional().or(z.literal("")),
 });
 
@@ -82,4 +86,31 @@ export const settingsSchema = z.object({
   whatsappPhoneNumberId: z.string().optional().or(z.literal("")),
   whatsappAccessToken: z.string().optional().or(z.literal("")),
   whatsappTestRecipient: z.string().optional().or(z.literal("")),
+  depotAddress: z.string().optional().or(z.literal("")),
+});
+
+export const orderSchema = z.object({
+  reference: z.string().optional().or(z.literal("")),
+  customerName: z.string().min(1, "Nom du client requis"),
+  customerPhone: z.string().optional().or(z.literal("")),
+  pickupAddress: z.string().min(1, "Adresse d'enlevement requise"),
+  deliveryAddress: z.string().min(1, "Adresse de livraison requise"),
+  priority: z.enum(["LOW", "MEDIUM", "HIGH", "URGENT"]).default("MEDIUM"),
+  requiredSkills: z.string().optional().or(z.literal("")),
+  serviceDurationMin: z.coerce.number().int().min(0).default(15),
+  timeWindowStart: z.string().optional().or(z.literal("")),
+  timeWindowEnd: z.string().optional().or(z.literal("")),
+  weightKg: z.coerce.number().optional(),
+  hazmat: z.coerce.boolean().default(false),
+});
+
+export const podSchema = z.object({
+  podSignature: z.string().optional().or(z.literal("")),
+  podNotes: z.string().optional().or(z.literal("")),
+  podBarcode: z.string().optional().or(z.literal("")),
+});
+
+export const feedbackSchema = z.object({
+  customerRating: z.coerce.number().int().min(1).max(5),
+  customerFeedback: z.string().optional().or(z.literal("")),
 });

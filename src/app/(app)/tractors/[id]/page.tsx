@@ -41,6 +41,8 @@ export default async function EditTractorPage({ params }: { params: { id: string
           insuranceExpiry: toDateInputValue(tractor.insuranceExpiry),
           technicalControlExpiry: toDateInputValue(tractor.technicalControlExpiry),
           notes: tractor.notes,
+          costPerKm: tractor.costPerKm,
+          hazmatCertified: tractor.hazmatCertified,
         }}
       />
 

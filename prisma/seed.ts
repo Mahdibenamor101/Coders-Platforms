@@ -1,6 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import { generateRecommendationsForCompany } from "../src/lib/recommendations";
+import { planOrders } from "../src/lib/planning";
 
 const prisma = new PrismaClient();
 
@@ -14,6 +15,9 @@ async function main() {
   const company = await prisma.company.create({
     data: {
       name: "Transports Demo SARL",
+      depotAddress: "Zone Industrielle, Casablanca, Maroc",
+      depotLat: 33.5945,
+      depotLng: -7.62,
       users: {
         create: {
           name: "Amine Benamor",
@@ -36,6 +40,8 @@ async function main() {
         licenseExpiry: daysFromNow(15),
         status: "ACTIVE",
         hireDate: daysFromNow(-400),
+        skills: "hayon, frigorifique",
+        costPerKm: 1.1,
       },
     }),
     prisma.driver.create({
@@ -48,6 +54,8 @@ async function main() {
         licenseExpiry: daysFromNow(200),
         status: "ACTIVE",
         hireDate: daysFromNow(-900),
+        skills: "adr, hayon",
+        costPerKm: 0.9,
       },
     }),
     prisma.driver.create({
@@ -60,6 +68,8 @@ async function main() {
         licenseExpiry: daysFromNow(-5),
         status: "ACTIVE",
         hireDate: daysFromNow(-1200),
+        skills: "hayon",
+        costPerKm: 1.0,
       },
     }),
   ]);
@@ -78,6 +88,7 @@ async function main() {
         nextMaintenanceMileage: 245500,
         insuranceExpiry: daysFromNow(10),
         technicalControlExpiry: daysFromNow(90),
+        costPerKm: 1.2,
       },
     }),
     prisma.tractor.create({
@@ -93,6 +104,7 @@ async function main() {
         nextMaintenanceMileage: 130000,
         insuranceExpiry: daysFromNow(180),
         technicalControlExpiry: daysFromNow(-3),
+        costPerKm: 1.0,
       },
     }),
     prisma.tractor.create({
@@ -108,6 +120,8 @@ async function main() {
         nextMaintenanceMileage: 300000,
         insuranceExpiry: daysFromNow(300),
         technicalControlExpiry: daysFromNow(150),
+        costPerKm: 1.3,
+        hazmatCertified: true,
       },
     }),
   ]);
@@ -199,8 +213,65 @@ async function main() {
     },
   });
 
-  await generateRecommendationsForCompany(company.id);
+  await prisma.order.createMany({
+    data: [
+      {
+        companyId: company.id,
+        reference: "CMD-0001",
+        customerName: "Societe ABC Distribution",
+        customerPhone: "+212611111111",
+        pickupAddress: "Zone Industrielle, Casablanca, Maroc",
+        pickupLat: 33.5945,
+        pickupLng: -7.62,
+        deliveryAddress: "Centre-ville, Mohammedia, Maroc",
+        deliveryLat: 33.6861,
+        deliveryLng: -7.3828,
+        priority: "MEDIUM",
+        weightKg: 500,
+        status: "PENDING",
+      },
+      {
+        companyId: company.id,
+        reference: "CMD-0002",
+        customerName: "Chimex SARL",
+        customerPhone: "+212622222222",
+        pickupAddress: "Port de Casablanca, Maroc",
+        pickupLat: 33.6043,
+        pickupLng: -7.6208,
+        deliveryAddress: "Zone Industrielle, Kenitra, Maroc",
+        deliveryLat: 34.261,
+        deliveryLng: -6.5802,
+        priority: "HIGH",
+        weightKg: 3000,
+        hazmat: true,
+        requiredSkills: "adr",
+        status: "PENDING",
+      },
+      {
+        companyId: company.id,
+        reference: "CMD-0003",
+        customerName: "Cooperative Nord",
+        customerPhone: "+212633333333",
+        pickupAddress: "Agdal, Rabat, Maroc",
+        pickupLat: 34.0209,
+        pickupLng: -6.8416,
+        deliveryAddress: "Centre-ville, Fes, Maroc",
+        deliveryLat: 34.0331,
+        deliveryLng: -5.0003,
+        priority: "HIGH",
+        weightKg: 1200,
+        requiredSkills: "hayon",
+        status: "PENDING",
+      },
+    ],
+  });
 
+  await generateRecommendationsForCompany(company.id);
+  const planResult = await planOrders(company.id);
+
+  console.log(
+    `Planification automatique : ${planResult.assigned} commande(s) assignee(s), ${planResult.skippedNoCapacity} ignoree(s) (competences/capacite/ADR).`
+  );
   console.log("Seed termine.");
   console.log("Connexion : demo@fleetlink.app / password123");
 }

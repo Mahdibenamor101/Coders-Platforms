@@ -22,9 +22,10 @@ export type RecommendationCategory =
   | "DOCUMENT_EXPIRY"
   | "DRIVER_HOURS"
   | "INSPECTION"
-  | "TRIP_REMINDER";
+  | "TRIP_REMINDER"
+  | "COMPLIANCE";
 
-export type RecommendationEntityType = "TRACTOR" | "TRAILER" | "DRIVER" | "TRIP";
+export type RecommendationEntityType = "TRACTOR" | "TRAILER" | "DRIVER" | "TRIP" | "ORDER";
 
 export type WhatsAppMessageType =
   | "TRIP_ASSIGNMENT"
@@ -33,3 +34,14 @@ export type WhatsAppMessageType =
   | "CUSTOM";
 
 export type WhatsAppMessageStatus = "PENDING" | "SENT" | "FAILED" | "SIMULATED";
+
+export type OrderPriority = "LOW" | "MEDIUM" | "HIGH" | "URGENT";
+
+export type OrderStatus =
+  | "PENDING"
+  | "ASSIGNED"
+  | "IN_PROGRESS"
+  | "DELIVERED"
+  | "FAILED"
+  | "CANCELLED";
+

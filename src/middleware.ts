@@ -2,7 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { jwtVerify } from "jose";
 import { SESSION_COOKIE } from "@/lib/auth";
 
-const PUBLIC_PATHS = ["/login", "/signup"];
+// Auth pages: redirect away to /dashboard if already logged in as a dispatcher.
+const AUTH_PAGES = ["/login", "/signup"];
+// Fully public content with its own token-based access (driver portal link,
+// customer feedback link) - never gated by the dispatcher session cookie.
+const OPEN_PATHS = ["/driver", "/feedback", "/manifest.json"];
 
 async function isValidSession(token: string | undefined) {
   if (!token) return false;
@@ -18,16 +22,20 @@ async function isValidSession(token: string | undefined) {
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const isPublic = PUBLIC_PATHS.some((p) => pathname.startsWith(p));
+  if (OPEN_PATHS.some((p) => pathname.startsWith(p))) {
+    return NextResponse.next();
+  }
+
+  const isAuthPage = AUTH_PAGES.some((p) => pathname.startsWith(p));
   const token = request.cookies.get(SESSION_COOKIE)?.value;
   const authed = await isValidSession(token);
 
-  if (!authed && !isPublic) {
+  if (!authed && !isAuthPage) {
     const loginUrl = new URL("/login", request.url);
     return NextResponse.redirect(loginUrl);
   }
 
-  if (authed && isPublic) {
+  if (authed && isAuthPage) {
     return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 

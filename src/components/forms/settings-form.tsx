@@ -12,6 +12,7 @@ export function SettingsForm({
     whatsappPhoneNumberId: string;
     whatsappAccessToken: string;
     whatsappTestRecipient: string;
+    depotAddress: string;
   };
 }) {
   const [state, formAction] = useFormState(updateSettingsAction, undefined);
@@ -29,6 +30,21 @@ export function SettingsForm({
       <div>
         <label className="label" htmlFor="companyName">Nom de l&apos;entreprise</label>
         <input className="input" id="companyName" name="companyName" defaultValue={defaults.companyName} required />
+      </div>
+
+      <div className="border-t border-slate-200 pt-4">
+        <h3 className="mb-1 text-sm font-semibold text-slate-800">Depot / point de depart</h3>
+        <p className="mb-4 text-xs text-slate-500">
+          Adresse utilisee comme point de depart pour la planification automatique des tournees et le
+          calcul des itineraires (geocodee automatiquement via OpenStreetMap).
+        </p>
+        <input
+          className="input"
+          id="depotAddress"
+          name="depotAddress"
+          placeholder="Ex : Zone Industrielle, Casablanca, Maroc"
+          defaultValue={defaults.depotAddress}
+        />
       </div>
 
       <div className="border-t border-slate-200 pt-4">

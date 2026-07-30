@@ -15,6 +15,8 @@ type Defaults = {
   insuranceExpiry?: string;
   technicalControlExpiry?: string;
   notes?: string | null;
+  costPerKm?: number | null;
+  hazmatCertified?: boolean;
 };
 
 export function TractorForm({
@@ -84,6 +86,21 @@ export function TractorForm({
             type="date"
             defaultValue={defaults?.technicalControlExpiry}
           />
+        </div>
+        <div>
+          <label className="label" htmlFor="costPerKm">Cout par km (pour la planification)</label>
+          <input className="input" id="costPerKm" name="costPerKm" type="number" step="0.01" defaultValue={defaults?.costPerKm ?? undefined} />
+        </div>
+        <div className="flex items-end pb-2">
+          <label className="flex items-center gap-2 text-sm text-slate-700">
+            <input
+              type="checkbox"
+              name="hazmatCertified"
+              defaultChecked={defaults?.hazmatCertified}
+              className="h-4 w-4 rounded border-slate-300"
+            />
+            Certifie matieres dangereuses (ADR)
+          </label>
         </div>
       </div>
       <div>

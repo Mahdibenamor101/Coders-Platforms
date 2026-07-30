@@ -13,6 +13,8 @@ type Defaults = {
   status?: string;
   hireDate?: string;
   notes?: string | null;
+  skills?: string | null;
+  costPerKm?: number | null;
 };
 
 export function DriverForm({
@@ -61,6 +63,20 @@ export function DriverForm({
         <div>
           <label className="label" htmlFor="hireDate">Date d&apos;embauche</label>
           <input className="input" id="hireDate" name="hireDate" type="date" defaultValue={defaults?.hireDate} />
+        </div>
+        <div>
+          <label className="label" htmlFor="skills">Competences (separees par des virgules)</label>
+          <input
+            className="input"
+            id="skills"
+            name="skills"
+            placeholder="hayon, adr, frigorifique"
+            defaultValue={defaults?.skills ?? ""}
+          />
+        </div>
+        <div>
+          <label className="label" htmlFor="costPerKm">Cout par km (pour la planification)</label>
+          <input className="input" id="costPerKm" name="costPerKm" type="number" step="0.01" defaultValue={defaults?.costPerKm ?? undefined} />
         </div>
       </div>
       <div>

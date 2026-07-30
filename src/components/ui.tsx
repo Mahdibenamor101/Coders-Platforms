@@ -19,6 +19,12 @@ const STATUS_STYLES: Record<string, string> = {
   SIMULATED: "bg-slate-200 text-slate-600",
   FAILED: "bg-red-100 text-red-700",
   PENDING: "bg-amber-100 text-amber-700",
+  ASSIGNED: "bg-blue-100 text-blue-700",
+  DELIVERED: "bg-emerald-100 text-emerald-700",
+  LOW: "bg-slate-200 text-slate-600",
+  MEDIUM: "bg-blue-100 text-blue-700",
+  HIGH: "bg-amber-100 text-amber-700",
+  URGENT: "bg-red-100 text-red-700",
 };
 
 const STATUS_LABELS: Record<string, string> = {
@@ -40,6 +46,12 @@ const STATUS_LABELS: Record<string, string> = {
   SIMULATED: "Simule",
   FAILED: "Echec",
   PENDING: "En attente",
+  ASSIGNED: "Assignee",
+  DELIVERED: "Livree",
+  LOW: "Basse",
+  MEDIUM: "Moyenne",
+  HIGH: "Haute",
+  URGENT: "Urgente",
 };
 
 export function StatusBadge({ status }: { status: string }) {

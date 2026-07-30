@@ -14,6 +14,7 @@ const CATEGORY_LABELS: Record<string, string> = {
   DRIVER_HOURS: "Temps de conduite",
   INSPECTION: "Inspection",
   TRIP_REMINDER: "Rappel de mission",
+  COMPLIANCE: "Conformite",
 };
 
 const SEVERITY_ORDER: Record<string, number> = { CRITICAL: 0, WARNING: 1, INFO: 2 };

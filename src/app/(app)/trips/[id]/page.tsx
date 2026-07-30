@@ -3,6 +3,7 @@ import { requireSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { PageHeader, StatusBadge } from "@/components/ui";
 import { DeleteButton } from "@/components/delete-button";
+import { OrderStopList } from "@/components/order-stop-list";
 import {
   notifyTripDriverAction,
   updateTripStatusAction,
@@ -14,7 +15,12 @@ export default async function TripDetailPage({ params }: { params: { id: string 
   const session = await requireSession();
   const trip = await prisma.trip.findFirst({
     where: { id: params.id, companyId: session.companyId },
-    include: { driver: true, tractor: true, trailer: true },
+    include: {
+      driver: true,
+      tractor: true,
+      trailer: true,
+      orders: { orderBy: { sequence: "asc" } },
+    },
   });
   if (!trip) notFound();
 
@@ -70,7 +76,39 @@ export default async function TripDetailPage({ params }: { params: { id: string 
           <div className="label">Chauffeur notifie</div>
           <div>{trip.driverNotifiedAt ? formatDateTime(trip.driverNotifiedAt) : "Non"}</div>
         </div>
+        {trip.distanceKm != null && (
+          <div>
+            <div className="label">Distance / duree estimee</div>
+            <div>
+              {trip.distanceKm.toFixed(0)} km
+              {trip.estimatedDurationMin
+                ? ` · ~${Math.round(trip.estimatedDurationMin / 60)}h${String(Math.round(trip.estimatedDurationMin % 60)).padStart(2, "0")}`
+                : ""}
+            </div>
+          </div>
+        )}
       </div>
+
+      {trip.orders.length > 0 && (
+        <div className="card p-6">
+          <h2 className="mb-1 text-base font-semibold text-slate-900">Arrets de la tournee</h2>
+          <p className="mb-4 text-sm text-slate-500">
+            Glissez-deposez pour reordonner les arrets ; la distance et la duree sont recalculees
+            automatiquement.
+          </p>
+          <OrderStopList
+            tripId={trip.id}
+            initialOrders={trip.orders.map((o) => ({
+              id: o.id,
+              reference: o.reference,
+              customerName: o.customerName,
+              deliveryAddress: o.deliveryAddress,
+              status: o.status,
+              priority: o.priority,
+            }))}
+          />
+        </div>
+      )}
 
       <div className="flex flex-wrap gap-3">
         <form action={boundNotify}>

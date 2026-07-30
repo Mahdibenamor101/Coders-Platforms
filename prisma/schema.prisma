@@ -17,6 +17,9 @@ model Company {
   whatsappPhoneNumberId    String?
   whatsappAccessToken      String?
   whatsappTestRecipient    String?
+  depotAddress             String?
+  depotLat                 Float?
+  depotLng                 Float?
   createdAt                DateTime @default(now())
   updatedAt                DateTime @updatedAt
 
@@ -25,6 +28,8 @@ model Company {
   tractors          Tractor[]
   trailers          Trailer[]
   trips             Trip[]
+  orders            Order[]
+  driverPositions   DriverPosition[]
   maintenanceRecords MaintenanceRecord[]
   recommendations   Recommendation[]
   whatsappMessages  WhatsAppMessage[]
@@ -55,10 +60,14 @@ model Driver {
   status        String       @default("ACTIVE")
   hireDate      DateTime?
   notes         String?
+  skills        String?
+  costPerKm     Float?
+  accessToken   String       @unique @default(cuid())
   createdAt     DateTime     @default(now())
   updatedAt     DateTime     @updatedAt
 
-  trips Trip[]
+  trips           Trip[]
+  driverPositions DriverPosition[]
 
   @@index([companyId])
 }
@@ -78,6 +87,8 @@ model Tractor {
   nextMaintenanceMileage   Int?
   insuranceExpiry          DateTime?
   technicalControlExpiry  DateTime?
+  costPerKm                Float?
+  hazmatCertified          Boolean       @default(false)
   notes                    String?
   createdAt                DateTime      @default(now())
   updatedAt                DateTime      @updatedAt
@@ -127,13 +138,74 @@ model Trip {
   status                String    @default("PLANNED")
   cargoDescription      String?
   distanceKm            Float?
+  estimatedDurationMin  Int?
+  routeGeometry         String?
+  avoidNotes            String?
   driverNotifiedAt      DateTime?
   createdAt             DateTime   @default(now())
   updatedAt             DateTime   @updatedAt
 
+  orders Order[]
+
   @@index([companyId])
   @@index([tractorId])
   @@index([trailerId])
+  @@index([driverId])
+}
+
+model Order {
+  id                  String    @id @default(cuid())
+  companyId           String
+  company             Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  reference           String
+  customerName        String
+  customerPhone       String?
+  pickupAddress       String
+  pickupLat           Float?
+  pickupLng           Float?
+  deliveryAddress     String
+  deliveryLat         Float?
+  deliveryLng         Float?
+  priority            String    @default("MEDIUM")
+  requiredSkills       String?
+  serviceDurationMin  Int       @default(15)
+  timeWindowStart     DateTime?
+  timeWindowEnd       DateTime?
+  weightKg            Float?
+  hazmat              Boolean   @default(false)
+  status              String    @default("PENDING")
+  tripId              String?
+  trip                Trip?     @relation(fields: [tripId], references: [id])
+  sequence            Int?
+  podSignature        String?
+  podPhotoPath        String?
+  podNotes            String?
+  podBarcode          String?
+  deliveredAt         DateTime?
+  customerNotifiedAt  DateTime?
+  feedbackToken       String    @unique @default(cuid())
+  customerRating      Int?
+  customerFeedback    String?
+  feedbackAt          DateTime?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  @@index([companyId])
+  @@index([tripId])
+}
+
+model DriverPosition {
+  id         String   @id @default(cuid())
+  companyId  String
+  company    Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  driverId   String
+  driver     Driver   @relation(fields: [driverId], references: [id], onDelete: Cascade)
+  tripId     String?
+  lat        Float
+  lng        Float
+  recordedAt DateTime @default(now())
+
+  @@index([companyId])
   @@index([driverId])
 }
 

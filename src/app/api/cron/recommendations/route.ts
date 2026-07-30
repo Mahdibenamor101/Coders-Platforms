@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { generateRecommendationsForCompany } from "@/lib/recommendations";
 
+// Must run per-request (touches the database on every call) - never statically prerendered.
+export const dynamic = "force-dynamic";
+
 /**
  * Cron endpoint: regenerates recommendations for every company.
  * Protect with CRON_SECRET in production (e.g. Vercel Cron "Authorization: Bearer <secret>").
