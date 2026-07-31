@@ -6,6 +6,10 @@ intelligentes generees automatiquement.
 
 ## Fonctionnalites
 
+- **Page d'accueil / landing page** (`/`) : presentation publique du produit
+  (animations Framer Motion), fonctionnalites, tarifs (3 offres) et FAQ. Visible
+  uniquement par les visiteurs non connectes ; redirige vers le tableau de bord
+  si une session est active.
 - **Multi-entreprise (SaaS)** : chaque entreprise inscrite dispose de son propre
   espace isole (tracteurs, remorques, chauffeurs, missions, parametres).
 - **Authentification** : inscription / connexion par email + mot de passe
@@ -67,6 +71,8 @@ intelligentes generees automatiquement.
 ## Stack technique
 
 - **Next.js 14** (App Router) + TypeScript + Tailwind CSS
+- **Framer Motion** + **lucide-react** pour les animations et icones de la
+  page d'accueil publique.
 - **Prisma** + SQLite (fichier local, aucune base externe requise pour
   demarrer). Le `datasource` peut etre bascule vers PostgreSQL/MySQL en
   production en changeant `provider` et `DATABASE_URL`.

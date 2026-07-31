@@ -45,3 +45,52 @@ body {
     @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium;
   }
 }
+
+html {
+  scroll-behavior: smooth;
+}
+
+@keyframes blob-float {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(30px, -40px) scale(1.08); }
+  66% { transform: translate(-20px, 20px) scale(0.94); }
+}
+
+@keyframes blob-float-slow {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(-40px, 30px) scale(1.1); }
+}
+
+@keyframes card-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-12px); }
+}
+
+.blob-anim {
+  animation: blob-float 14s ease-in-out infinite;
+}
+
+.blob-anim-slow {
+  animation: blob-float-slow 18s ease-in-out infinite;
+}
+
+.float-anim {
+  animation: card-float 6s ease-in-out infinite;
+}
+
+.float-anim-delayed {
+  animation: card-float 6s ease-in-out infinite;
+  animation-delay: 1.5s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .blob-anim,
+  .blob-anim-slow,
+  .float-anim,
+  .float-anim-delayed {
+    animation: none;
+  }
+  html {
+    scroll-behavior: auto;
+  }
+}

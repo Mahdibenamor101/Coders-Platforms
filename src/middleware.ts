@@ -26,7 +26,11 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  const isAuthPage = AUTH_PAGES.some((p) => pathname.startsWith(p));
+  // "/" is the public marketing landing page for logged-out visitors, but
+  // logged-in users are sent straight to the dashboard - same treatment as
+  // the auth pages. Matched exactly (not by prefix) so it doesn't swallow
+  // every other route.
+  const isAuthPage = pathname === "/" || AUTH_PAGES.some((p) => pathname.startsWith(p));
   const token = request.cookies.get(SESSION_COOKIE)?.value;
   const authed = await isValidSession(token);
 
