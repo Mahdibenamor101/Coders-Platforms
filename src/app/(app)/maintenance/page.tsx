@@ -1,8 +1,10 @@
+import { Suspense } from "react";
 import { requireSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { PageHeader, EmptyState, LinkButton } from "@/components/ui";
 import { DeleteButton } from "@/components/delete-button";
 import { deleteMaintenanceAction } from "@/lib/actions/maintenance-actions";
+import { FlashBanner } from "@/components/flash-banner";
 import { formatDate } from "@/lib/format";
 
 const TYPE_LABELS: Record<string, string> = {
@@ -29,6 +31,10 @@ export default async function MaintenancePage() {
         description="Historique des entretiens et prochaines echeances."
         action={<LinkButton href="/maintenance/new">+ Nouvel entretien</LinkButton>}
       />
+
+      <Suspense fallback={null}>
+        <FlashBanner />
+      </Suspense>
 
       {records.length === 0 ? (
         <EmptyState

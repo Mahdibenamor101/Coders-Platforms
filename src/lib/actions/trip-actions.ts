@@ -98,7 +98,7 @@ export async function createTripAction(_prev: FormState, formData: FormData): Pr
   revalidatePath("/trips");
   revalidatePath("/tractors");
   revalidatePath("/trailers");
-  redirect("/trips");
+  redirect("/trips?flash=created");
 }
 
 export async function notifyTripDriverAction(tripId: string) {

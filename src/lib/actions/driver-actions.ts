@@ -48,7 +48,7 @@ export async function createDriverAction(_prev: FormState, formData: FormData): 
   });
 
   revalidatePath("/drivers");
-  redirect("/drivers");
+  redirect("/drivers?flash=created");
 }
 
 export async function updateDriverAction(
@@ -80,7 +80,7 @@ export async function updateDriverAction(
   });
 
   revalidatePath("/drivers");
-  redirect("/drivers");
+  redirect("/drivers?flash=updated");
 }
 
 export async function deleteDriverAction(driverId: string) {

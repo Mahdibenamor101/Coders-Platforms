@@ -53,7 +53,7 @@ export async function createTractorAction(_prev: FormState, formData: FormData):
   });
 
   revalidatePath("/tractors");
-  redirect("/tractors");
+  redirect("/tractors?flash=created");
 }
 
 export async function updateTractorAction(
@@ -89,7 +89,7 @@ export async function updateTractorAction(
   });
 
   revalidatePath("/tractors");
-  redirect("/tractors");
+  redirect("/tractors?flash=updated");
 }
 
 export async function deleteTractorAction(tractorId: string) {

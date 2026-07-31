@@ -1,8 +1,10 @@
-import Link from "next/link";
+import { Suspense } from "react";
 import { requireSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { PageHeader, StatusBadge, EmptyState, LinkButton } from "@/components/ui";
+import { PageHeader, EmptyState, LinkButton } from "@/components/ui";
 import { AutoPlanButton } from "@/components/auto-plan-button";
+import { OrdersTable } from "@/components/tables/orders-table";
+import { FlashBanner } from "@/components/flash-banner";
 
 export default async function OrdersPage() {
   const session = await requireSession();
@@ -21,6 +23,10 @@ export default async function OrdersPage() {
         description="Commandes clients a livrer : priorite, fenetres horaires, competences requises."
         action={<LinkButton href="/orders/new">+ Nouvelle commande</LinkButton>}
       />
+
+      <Suspense fallback={null}>
+        <FlashBanner />
+      </Suspense>
 
       <div className="card flex flex-wrap items-center justify-between gap-4 p-6">
         <div>
@@ -42,48 +48,7 @@ export default async function OrdersPage() {
           action={<LinkButton href="/orders/new">+ Nouvelle commande</LinkButton>}
         />
       ) : (
-        <div className="card overflow-x-auto">
-          <table className="w-full text-left text-sm">
-            <thead className="border-b border-slate-200 text-xs uppercase text-slate-500">
-              <tr>
-                <th className="px-4 py-3">Reference</th>
-                <th className="px-4 py-3">Client</th>
-                <th className="px-4 py-3">Trajet</th>
-                <th className="px-4 py-3">Priorite</th>
-                <th className="px-4 py-3">Tournee</th>
-                <th className="px-4 py-3">Statut</th>
-                <th className="px-4 py-3"></th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {orders.map((order) => (
-                <tr key={order.id} className="hover:bg-slate-50">
-                  <td className="px-4 py-3 font-medium text-slate-900">{order.reference}</td>
-                  <td className="px-4 py-3">{order.customerName}</td>
-                  <td className="px-4 py-3 text-slate-600">
-                    {order.pickupAddress} → {order.deliveryAddress}
-                  </td>
-                  <td className="px-4 py-3"><StatusBadge status={order.priority} /></td>
-                  <td className="px-4 py-3">
-                    {order.trip ? (
-                      <Link href={`/trips/${order.trip.id}`} className="text-emerald-700 hover:underline">
-                        {order.trip.driver.firstName} {order.trip.driver.lastName}
-                      </Link>
-                    ) : (
-                      "-"
-                    )}
-                  </td>
-                  <td className="px-4 py-3"><StatusBadge status={order.status} /></td>
-                  <td className="px-4 py-3 text-right">
-                    <Link href={`/orders/${order.id}`} className="font-medium text-emerald-700 hover:underline">
-                      Modifier
-                    </Link>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <OrdersTable orders={orders} />
       )}
     </div>
   );

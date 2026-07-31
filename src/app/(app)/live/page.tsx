@@ -2,6 +2,7 @@ import { requireSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { PageHeader } from "@/components/ui";
 import { FleetMapClient } from "@/components/fleet-map-client";
+import { LiveRefresh } from "@/components/live-refresh";
 import type { DriverMarker, RouteLine } from "@/components/fleet-map";
 
 const FALLBACK_CENTER: [number, number] = [31.7917, -7.0926];
@@ -62,6 +63,7 @@ export default async function LivePage() {
       <PageHeader
         title="Carte live"
         description="Position des chauffeurs et tracees de tournee en temps reel (OpenStreetMap)."
+        action={<LiveRefresh />}
       />
       <div className="card mb-4 flex flex-wrap gap-6 p-4 text-sm">
         <div>

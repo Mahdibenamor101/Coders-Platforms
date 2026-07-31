@@ -3,6 +3,7 @@ import { requireSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { generateRecommendationsForCompany } from "@/lib/recommendations";
 import { PageHeader, StatusBadge } from "@/components/ui";
+import { TractorStatusChart, OrdersStatusChart } from "@/components/dashboard-charts";
 import { formatDateTime } from "@/lib/format";
 
 const SEVERITY_ORDER: Record<string, number> = { CRITICAL: 0, WARNING: 1, INFO: 2 };
@@ -31,6 +32,7 @@ export default async function DashboardPage() {
     recommendations,
     recentMessages,
     tractorsByStatus,
+    ordersByStatus,
   ] = await Promise.all([
     prisma.tractor.count({ where: { companyId } }),
     prisma.trailer.count({ where: { companyId } }),
@@ -53,6 +55,7 @@ export default async function DashboardPage() {
       take: 5,
     }),
     prisma.tractor.groupBy({ by: ["status"], where: { companyId }, _count: true }),
+    prisma.order.groupBy({ by: ["status"], where: { companyId }, _count: true }),
   ]);
 
   const sortedRecommendations = [...recommendations].sort(
@@ -133,38 +136,36 @@ export default async function DashboardPage() {
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <div className="card p-6">
           <h2 className="mb-4 text-base font-semibold text-slate-900">Etat du parc tracteurs</h2>
-          {tractorsByStatus.length === 0 ? (
-            <p className="text-sm text-slate-500">Aucun tracteur enregistre.</p>
-          ) : (
-            <ul className="space-y-2">
-              {tractorsByStatus.map((row) => (
-                <li key={row.status} className="flex items-center justify-between text-sm">
-                  <StatusBadge status={row.status} />
-                  <span className="font-medium text-slate-700">{row._count}</span>
-                </li>
-              ))}
-            </ul>
-          )}
+          <TractorStatusChart
+            data={tractorsByStatus.map((row) => ({ status: row.status, count: row._count }))}
+          />
         </div>
 
         <div className="card p-6">
-          <h2 className="mb-4 text-base font-semibold text-slate-900">Derniers messages WhatsApp</h2>
-          {recentMessages.length === 0 ? (
-            <p className="text-sm text-slate-500">Aucun message envoye pour le moment.</p>
-          ) : (
-            <ul className="space-y-3">
-              {recentMessages.map((m) => (
-                <li key={m.id} className="flex items-center justify-between text-sm">
-                  <div>
-                    <div className="font-medium text-slate-800">{m.toPhone}</div>
-                    <div className="text-xs text-slate-500">{formatDateTime(m.createdAt)}</div>
-                  </div>
-                  <StatusBadge status={m.status} />
-                </li>
-              ))}
-            </ul>
-          )}
+          <h2 className="mb-4 text-base font-semibold text-slate-900">Commandes par statut</h2>
+          <OrdersStatusChart
+            data={ordersByStatus.map((row) => ({ status: row.status, count: row._count }))}
+          />
         </div>
+      </div>
+
+      <div className="card p-6">
+        <h2 className="mb-4 text-base font-semibold text-slate-900">Derniers messages WhatsApp</h2>
+        {recentMessages.length === 0 ? (
+          <p className="text-sm text-slate-500">Aucun message envoye pour le moment.</p>
+        ) : (
+          <ul className="space-y-3">
+            {recentMessages.map((m) => (
+              <li key={m.id} className="flex items-center justify-between text-sm">
+                <div>
+                  <div className="font-medium text-slate-800">{m.toPhone}</div>
+                  <div className="text-xs text-slate-500">{formatDateTime(m.createdAt)}</div>
+                </div>
+                <StatusBadge status={m.status} />
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
     </div>
   );

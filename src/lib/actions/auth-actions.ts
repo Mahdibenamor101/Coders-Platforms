@@ -1,16 +1,30 @@
 "use server";
 
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { createSessionToken, SESSION_COOKIE } from "@/lib/auth";
 import { loginSchema, signupSchema } from "@/lib/validation";
+import { checkRateLimit } from "@/lib/rate-limit";
 import type { Role } from "@/lib/enums";
 
 export type FormState = { error?: string } | undefined;
 
+const RATE_LIMIT_MESSAGE = "Trop de tentatives. Veuillez patienter quelques minutes avant de reessayer.";
+
+async function getClientIp(): Promise<string> {
+  const headerList = await headers();
+  const forwardedFor = headerList.get("x-forwarded-for");
+  return forwardedFor?.split(",")[0]?.trim() || headerList.get("x-real-ip") || "unknown";
+}
+
 export async function signupAction(_prev: FormState, formData: FormData): Promise<FormState> {
+  const ip = await getClientIp();
+  if (!checkRateLimit(`signup:${ip}`, 5, 60 * 60 * 1000)) {
+    return { error: RATE_LIMIT_MESSAGE };
+  }
+
   const parsed = signupSchema.safeParse({
     companyName: formData.get("companyName"),
     name: formData.get("name"),
@@ -79,6 +93,11 @@ export async function loginAction(_prev: FormState, formData: FormData): Promise
   }
 
   const { email, password } = parsed.data;
+
+  const ip = await getClientIp();
+  if (!checkRateLimit(`login:${ip}:${email}`, 10, 15 * 60 * 1000)) {
+    return { error: RATE_LIMIT_MESSAGE };
+  }
 
   const user = await prisma.user.findUnique({ where: { email } });
   if (!user) {

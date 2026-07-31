@@ -10,6 +10,9 @@ const DOCUMENT_WARNING_DAYS = 30;
 const MAINTENANCE_WARNING_KM = 1000;
 const TRIP_REMINDER_HOURS = 24;
 const LONG_HAUL_HOURS = 9;
+const ORDER_BACKLOG_WARNING_HOURS = 48;
+const ORDER_BACKLOG_CRITICAL_HOURS = 24 * 7;
+const DRIVER_INACTIVITY_DAYS = 14;
 
 type DraftRecommendation = {
   entityType: RecommendationEntityType;
@@ -36,14 +39,18 @@ export async function generateRecommendationsForCompany(companyId: string) {
   const now = new Date();
   const drafts: DraftRecommendation[] = [];
 
-  const [drivers, tractors, trailers, trips] = await Promise.all([
-    prisma.driver.findMany({ where: { companyId, status: { not: "SUSPENDED" } } }),
+  const [drivers, tractors, trailers, trips, pendingOrders] = await Promise.all([
+    prisma.driver.findMany({
+      where: { companyId, status: { not: "SUSPENDED" } },
+      include: { trips: { orderBy: { departureAt: "desc" }, take: 1 } },
+    }),
     prisma.tractor.findMany({ where: { companyId } }),
     prisma.trailer.findMany({ where: { companyId } }),
     prisma.trip.findMany({
       where: { companyId, status: { in: ["PLANNED", "IN_PROGRESS"] } },
       include: { driver: true, tractor: true, trailer: true, orders: true },
     }),
+    prisma.order.findMany({ where: { companyId, status: "PENDING" } }),
   ]);
 
   for (const driver of drivers) {
@@ -71,6 +78,23 @@ export async function generateRecommendationsForCompany(companyId: string) {
         message: `Le permis de conduire de ${label} expire dans ${days} jour(s) (${driver.licenseExpiry.toLocaleDateString("fr-FR")}). Planifiez le renouvellement.`,
         dueAt: driver.licenseExpiry,
       });
+    }
+
+    if (driver.status === "ACTIVE") {
+      const lastTrip = driver.trips[0];
+      const referenceDate = lastTrip?.departureAt ?? driver.hireDate ?? driver.createdAt;
+      const inactiveDays = Math.floor((now.getTime() - referenceDate.getTime()) / DAY_MS);
+      if (inactiveDays >= DRIVER_INACTIVITY_DAYS) {
+        drafts.push({
+          entityType: "DRIVER",
+          entityId: driver.id,
+          entityLabel: label,
+          severity: "INFO",
+          category: "UTILIZATION",
+          title: "Chauffeur sans mission depuis longtemps",
+          message: `${label} n'a pas eu de mission depuis ${inactiveDays} jour(s). Verifiez sa disponibilite ou assignez-lui une tournee.`,
+        });
+      }
     }
   }
 
@@ -281,6 +305,21 @@ export async function generateRecommendationsForCompany(companyId: string) {
         category: "COMPLIANCE",
         title: "Surcharge de la remorque",
         message: `La tournee ${label} totalise ${totalWeightKg.toLocaleString("fr-FR")} kg pour une capacite de ${capacityKg.toLocaleString("fr-FR")} kg (remorque ${trip.trailer?.plateNumber}). Retirez ou reassignez des commandes.`,
+      });
+    }
+  }
+
+  for (const order of pendingOrders) {
+    const ageHours = (now.getTime() - order.createdAt.getTime()) / (60 * 60 * 1000);
+    if (ageHours >= ORDER_BACKLOG_WARNING_HOURS) {
+      drafts.push({
+        entityType: "ORDER",
+        entityId: order.id,
+        entityLabel: `${order.reference} - ${order.customerName}`,
+        severity: ageHours >= ORDER_BACKLOG_CRITICAL_HOURS ? "CRITICAL" : "WARNING",
+        category: "ORDER_BACKLOG",
+        title: "Commande en attente d'assignation",
+        message: `La commande ${order.reference} (${order.customerName}) est en attente depuis ${Math.floor(ageHours / 24)} jour(s) sans etre assignee a une tournee. Lancez la planification automatique ou verifiez qu'aucun vehicule/chauffeur compatible n'est disponible.`,
       });
     }
   }

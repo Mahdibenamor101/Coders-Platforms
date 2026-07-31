@@ -65,7 +65,7 @@ export async function createOrderAction(_prev: FormState, formData: FormData): P
   });
 
   revalidatePath("/orders");
-  redirect("/orders");
+  redirect("/orders?flash=created");
 }
 
 export async function updateOrderAction(
@@ -121,7 +121,7 @@ export async function updateOrderAction(
   }
 
   revalidatePath("/orders");
-  redirect("/orders");
+  redirect("/orders?flash=updated");
 }
 
 export async function deleteOrderAction(orderId: string) {

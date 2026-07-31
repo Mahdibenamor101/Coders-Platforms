@@ -41,7 +41,7 @@ export function LandingFaq() {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
 
   return (
-    <section id="faq" className="bg-slate-50 py-24">
+    <section id="faq" className="scroll-mt-20 bg-slate-50 py-24">
       <div className="mx-auto max-w-3xl px-6">
         <motion.div
           initial={{ opacity: 0, y: 20 }}

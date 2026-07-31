@@ -41,7 +41,7 @@ export async function createTrailerAction(_prev: FormState, formData: FormData):
   });
 
   revalidatePath("/trailers");
-  redirect("/trailers");
+  redirect("/trailers?flash=created");
 }
 
 export async function updateTrailerAction(
@@ -70,7 +70,7 @@ export async function updateTrailerAction(
   });
 
   revalidatePath("/trailers");
-  redirect("/trailers");
+  redirect("/trailers?flash=updated");
 }
 
 export async function deleteTrailerAction(trailerId: string) {

@@ -28,7 +28,7 @@ const STEPS = [
 
 export function LandingHowItWorks() {
   return (
-    <section id="how-it-works" className="bg-slate-50 py-24">
+    <section id="how-it-works" className="scroll-mt-20 bg-slate-50 py-24">
       <div className="mx-auto max-w-6xl px-6">
         <motion.div
           initial={{ opacity: 0, y: 20 }}

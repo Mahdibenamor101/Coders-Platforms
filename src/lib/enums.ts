@@ -23,7 +23,9 @@ export type RecommendationCategory =
   | "DRIVER_HOURS"
   | "INSPECTION"
   | "TRIP_REMINDER"
-  | "COMPLIANCE";
+  | "COMPLIANCE"
+  | "ORDER_BACKLOG"
+  | "UTILIZATION";
 
 export type RecommendationEntityType = "TRACTOR" | "TRAILER" | "DRIVER" | "TRIP" | "ORDER";
 

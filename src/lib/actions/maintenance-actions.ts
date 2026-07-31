@@ -80,7 +80,7 @@ export async function createMaintenanceAction(
   revalidatePath("/maintenance");
   revalidatePath("/tractors");
   revalidatePath("/trailers");
-  redirect("/maintenance");
+  redirect("/maintenance?flash=created");
 }
 
 export async function deleteMaintenanceAction(recordId: string) {

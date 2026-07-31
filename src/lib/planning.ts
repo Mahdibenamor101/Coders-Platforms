@@ -230,7 +230,7 @@ export async function planOrders(companyId: string) {
   };
 }
 
-function sequenceOrdersNearestNeighbor(depot: LatLng | null, orders: Order[]): Order[] {
+export function sequenceOrdersNearestNeighbor(depot: LatLng | null, orders: Order[]): Order[] {
   const remaining = [...orders];
   const result: Order[] = [];
   let current: LatLng | null = depot;
@@ -254,10 +254,70 @@ function sequenceOrdersNearestNeighbor(depot: LatLng | null, orders: Order[]): O
   return result;
 }
 
+export function routeCost(depot: LatLng | null, orders: Order[]): number {
+  let cost = 0;
+  let current = depot;
+  for (const order of orders) {
+    const pickup = { lat: order.pickupLat!, lng: order.pickupLng! };
+    const delivery = { lat: order.deliveryLat!, lng: order.deliveryLng! };
+    if (current) cost += haversineKm(current, pickup);
+    cost += haversineKm(pickup, delivery);
+    current = delivery;
+  }
+  return cost;
+}
+
+const MAX_IMPROVEMENT_PASSES = 15;
+
 /**
- * Recomputes stop order (nearest-neighbor) and route distance/duration/geometry
- * for a trip, based on its currently assigned orders. Called after planning,
- * manual order assignment, or a dispatcher drag-and-drop reorder.
+ * Local-search improvement pass ("or-opt" relocation) run after the
+ * nearest-neighbor construction: repeatedly tries moving each order to a
+ * different position in the sequence and keeps the move if it reduces total
+ * route distance. This isn't full 2-opt (each order is an atomic
+ * pickup-then-delivery block, not a swappable point) but it meaningfully
+ * tightens the naive nearest-neighbor tour for the handful of stops a route
+ * typically has.
+ */
+export function improveSequence(depot: LatLng | null, orders: Order[]): Order[] {
+  if (orders.length < 3) return orders;
+  let sequence = orders;
+
+  for (let pass = 0; pass < MAX_IMPROVEMENT_PASSES; pass++) {
+    let improvedThisPass = false;
+
+    for (let i = 0; i < sequence.length; i++) {
+      const order = sequence[i];
+      const withoutOrder = [...sequence.slice(0, i), ...sequence.slice(i + 1)];
+      let bestCost = routeCost(depot, sequence);
+      let bestSequence = sequence;
+
+      for (let j = 0; j <= withoutOrder.length; j++) {
+        const candidate = [...withoutOrder.slice(0, j), order, ...withoutOrder.slice(j)];
+        const cost = routeCost(depot, candidate);
+        if (cost < bestCost - 0.001) {
+          bestCost = cost;
+          bestSequence = candidate;
+        }
+      }
+
+      if (bestSequence !== sequence) {
+        sequence = bestSequence;
+        improvedThisPass = true;
+      }
+    }
+
+    if (!improvedThisPass) break;
+  }
+
+  return sequence;
+}
+
+/**
+ * Recomputes stop order (nearest-neighbor + or-opt improvement) and route
+ * distance/duration/geometry for a trip, based on its currently assigned
+ * orders. Called after planning or manual order assignment - NOT after a
+ * dispatcher drag-and-drop reorder, which represents a deliberate manual
+ * choice that should not be silently re-optimized away.
  */
 export async function resequenceTrip(tripId: string) {
   const trip = await prisma.trip.findUniqueOrThrow({
@@ -274,7 +334,7 @@ export async function resequenceTrip(tripId: string) {
     (o) => o.status !== "CANCELLED" && o.status !== "FAILED" && o.pickupLat != null && o.pickupLng != null
   );
 
-  const sequenced = sequenceOrdersNearestNeighbor(depot, activeOrders);
+  const sequenced = improveSequence(depot, sequenceOrdersNearestNeighbor(depot, activeOrders));
 
   for (let i = 0; i < sequenced.length; i++) {
     await prisma.order.update({ where: { id: sequenced[i].id }, data: { sequence: i } });

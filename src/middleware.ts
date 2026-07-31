@@ -6,7 +6,7 @@ import { SESSION_COOKIE } from "@/lib/auth";
 const AUTH_PAGES = ["/login", "/signup"];
 // Fully public content with its own token-based access (driver portal link,
 // customer feedback link) - never gated by the dispatcher session cookie.
-const OPEN_PATHS = ["/driver", "/feedback", "/manifest.json"];
+const OPEN_PATHS = ["/driver", "/feedback", "/opengraph-image", "/twitter-image"];
 
 async function isValidSession(token: string | undefined) {
   if (!token) return false;
@@ -47,5 +47,11 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
+  // Exclude API routes, Next internals, and any request for a static asset
+  // file (images, icons, manifest, etc.) - including the image optimizer's
+  // own internal re-fetch of files under /public, which carries no session
+  // cookie and would otherwise get bounced to /login.
+  matcher: [
+    "/((?!api|_next/static|_next/image|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|json|txt|xml|webmanifest)$).*)",
+  ],
 };
