@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { mkdir, writeFile } from "fs/promises";
 import path from "path";
+import { put } from "@vercel/blob";
 import { prisma } from "@/lib/prisma";
 import { notifyCustomer } from "@/lib/customer-notify";
 import { podSchema } from "@/lib/validation";
@@ -96,13 +97,21 @@ export async function submitProofOfDeliveryAction(
   let podPhotoPath: string | null = null;
   const photo = formData.get("photo");
   if (photo instanceof File && photo.size > 0) {
-    const uploadsDir = path.join(process.cwd(), "public", "uploads", "pod");
-    await mkdir(uploadsDir, { recursive: true });
     const extension = (photo.type.split("/")[1] || "jpg").replace(/[^a-z0-9]/gi, "");
     const filename = `${orderId}-${Date.now()}.${extension}`;
-    const buffer = Buffer.from(await photo.arrayBuffer());
-    await writeFile(path.join(uploadsDir, filename), buffer);
-    podPhotoPath = `/uploads/pod/${filename}`;
+
+    if (process.env.BLOB_READ_WRITE_TOKEN) {
+      // Serverless hosts (Vercel, etc.) have a read-only/ephemeral filesystem,
+      // so photos must go to object storage rather than public/uploads.
+      const blob = await put(`pod/${filename}`, photo, { access: "public" });
+      podPhotoPath = blob.url;
+    } else {
+      const uploadsDir = path.join(process.cwd(), "public", "uploads", "pod");
+      await mkdir(uploadsDir, { recursive: true });
+      const buffer = Buffer.from(await photo.arrayBuffer());
+      await writeFile(path.join(uploadsDir, filename), buffer);
+      podPhotoPath = `/uploads/pod/${filename}`;
+    }
   }
 
   const updated = await prisma.order.update({

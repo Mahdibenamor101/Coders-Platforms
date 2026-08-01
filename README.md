@@ -93,10 +93,13 @@ intelligentes generees automatiquement.
 
 ## Demarrage
 
+Necessite une base Postgres accessible localement (par ex. via Docker :
+`docker run --name fleetlink-db -e POSTGRES_PASSWORD=postgres -p 5432:5432 -d postgres`).
+
 ```bash
 npm install
-cp .env.example .env      # ajuster AUTH_SECRET en production
-npm run db:push           # cree prisma/dev.db a partir du schema
+cp .env.example .env      # renseigner DATABASE_URL et generer un AUTH_SECRET
+npm run db:push           # synchronise le schema Prisma avec la base
 npm run db:seed           # jeu de donnees de demonstration
 npm run dev
 ```
@@ -124,6 +127,47 @@ d'environnement `WHATSAPP_DEFAULT_PHONE_NUMBER_ID` et
 `WHATSAPP_DEFAULT_ACCESS_TOKEN`. Sans configuration, tous les envois sont
 simules et journalises (visible dans le journal des messages, page
 Parametres) afin de ne jamais bloquer l'utilisation de l'application.
+
+## Deploiement en production (Vercel)
+
+1. **Poussez le repo sur GitHub** (deja fait si vous travaillez depuis cette
+   branche), puis importez le projet sur [vercel.com](https://vercel.com) →
+   *Add New → Project* → selectionnez le repo.
+2. **Base de donnees Postgres** — creez-en une avant le premier deploiement :
+   - *Option simple* : dans le dashboard Vercel du projet, onglet **Storage**
+     → **Create Database** → **Postgres** (Neon). Vercel ajoute
+     automatiquement les variables `DATABASE_URL` (et alias) au projet.
+   - *Alternative* : un compte gratuit chez [Neon](https://neon.tech) ou
+     [Supabase](https://supabase.com) fonctionne aussi ; copiez la chaine de
+     connexion fournie dans `DATABASE_URL`.
+3. **Variables d'environnement** (onglet **Settings → Environment
+   Variables** du projet Vercel) :
+   - `DATABASE_URL` — chaine de connexion Postgres (etape precedente).
+   - `AUTH_SECRET` — chaine aleatoire longue, par ex. generee avec
+     `openssl rand -hex 32`.
+   - `APP_URL` — l'URL publique de votre deploiement (ex.
+     `https://votre-app.vercel.app`), utilisee dans les liens WhatsApp/SMS
+     envoyes aux chauffeurs et clients.
+   - `BLOB_READ_WRITE_TOKEN` — creez un store dans l'onglet **Storage** →
+     **Create Database** → **Blob**, puis copiez le token genere. Necessaire
+     pour que les photos de preuve de livraison persistent (le disque local
+     n'est pas fiable en serverless) ; sans ce token, l'app fonctionne mais
+     revient au stockage disque local (non persistant en production).
+   - `WHATSAPP_DEFAULT_PHONE_NUMBER_ID` / `WHATSAPP_DEFAULT_ACCESS_TOKEN` —
+     optionnel, seulement si vous voulez des valeurs par defaut au niveau
+     plateforme (chaque entreprise peut aussi configurer les siennes dans
+     **Parametres**).
+4. **Premier deploiement** : cliquez **Deploy**. Vercel installe les
+   dependances (`postinstall` lance `prisma generate` automatiquement) et
+   build l'application.
+5. **Synchronisez le schema sur la base de production** (une fois, puis a
+   chaque evolution du schema) depuis votre machine :
+   ```bash
+   DATABASE_URL="<chaine de connexion production>" npx prisma db push
+   ```
+6. Le cron de recommandations (`vercel.json`, `/api/cron/recommendations`,
+   tous les jours a 6h) est active automatiquement sur les projets Vercel Pro ;
+   sur le plan Hobby, appelez-le manuellement ou via un service cron externe.
 
 ## Scripts utiles
 
@@ -157,8 +201,17 @@ src/app/api/driver/        endpoint de remontee de position GPS
 - La planification automatique est une heuristique gloutonne, pas un solveur
   VRP exact — bon point de depart, affinable manuellement via le
   glisser-deposer.
-- Les photos de preuve de livraison sont ecrites sur le disque local
-  (`public/uploads/pod`) : a remplacer par un stockage objet (S3, Cloud
-  Storage, etc.) pour un deploiement serverless/multi-instance.
+- Les photos de preuve de livraison utilisent Vercel Blob en production
+  (variable `BLOB_READ_WRITE_TOKEN`) et retombent sur le disque local
+  (`public/uploads/pod`) si elle est absente — pratique en local, mais non
+  persistant en serverless.
 - Le portail conducteur est une PWA web (lien + "ajouter a l'ecran d'accueil"),
   sans service worker hors-ligne ; pas de vraie application native iOS/Android.
+- Le schema Prisma est synchronise avec `prisma db push` (pas de vraies
+  migrations versionnees) : suffisant pour ce stade du projet, mais a
+  remplacer par `prisma migrate` avant d'avoir de vraies donnees clients en
+  production.
+- Le rate limiting (connexion/inscription) est en memoire, par instance : il
+  ralentit le brute force sur un seul serveur mais ne partage pas l'etat entre
+  plusieurs instances serverless. A remplacer par un store partage (Redis,
+  Upstash) si le trafic le justifie.
