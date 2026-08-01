@@ -10,6 +10,10 @@ export function LandingHero() {
   return (
     <section className="relative overflow-hidden bg-gradient-to-b from-emerald-50 via-white to-white pt-32 pb-24">
       <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
+        <div
+          className="bg-dot-grid absolute inset-0"
+          style={{ maskImage: "radial-gradient(ellipse 60% 50% at 50% 0%, black 40%, transparent 90%)" }}
+        />
         <div className="blob-anim absolute -top-24 -left-24 h-96 w-96 rounded-full bg-emerald-200/50 blur-3xl" />
         <div className="blob-anim-slow absolute top-40 -right-32 h-[28rem] w-[28rem] rounded-full bg-blue-200/40 blur-3xl" />
       </div>

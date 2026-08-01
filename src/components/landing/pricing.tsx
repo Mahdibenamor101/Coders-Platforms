@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { Check, Sparkles, Building2, Truck } from "lucide-react";
+import { LandingTrustBadges } from "./trust-badges";
 
 const PLANS = [
   {
@@ -115,10 +116,11 @@ export function LandingPricing() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, amount: 0.3 }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
-              className={`relative flex flex-col rounded-2xl border p-8 ${
+              whileHover={{ y: plan.highlighted ? -20 : -4 }}
+              className={`relative flex flex-col rounded-2xl border p-8 transition-shadow ${
                 plan.highlighted
-                  ? "border-emerald-600 bg-emerald-600 text-white shadow-xl shadow-emerald-600/25 lg:-translate-y-4"
-                  : "border-slate-200 bg-white"
+                  ? "border-emerald-600 bg-gradient-to-br from-emerald-600 to-emerald-700 text-white shadow-xl shadow-emerald-600/25 lg:-translate-y-4"
+                  : "border-slate-200 bg-white hover:shadow-lg"
               }`}
             >
               {plan.highlighted && (
@@ -193,6 +195,8 @@ export function LandingPricing() {
         <p className="mt-8 text-center text-xs text-slate-400">
           Tarifs indicatifs, adaptables selon vos besoins. Contactez-nous pour une offre sur mesure.
         </p>
+
+        <LandingTrustBadges />
       </div>
     </section>
   );
