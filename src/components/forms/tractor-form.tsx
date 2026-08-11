@@ -17,6 +17,8 @@ type Defaults = {
   notes?: string | null;
   costPerKm?: number | null;
   hazmatCertified?: boolean;
+  fuelLevelPercent?: number | null;
+  adBlueLevelPercent?: number | null;
 };
 
 export function TractorForm({
@@ -90,6 +92,30 @@ export function TractorForm({
         <div>
           <label className="label" htmlFor="costPerKm">Cout par km (pour la planification)</label>
           <input className="input" id="costPerKm" name="costPerKm" type="number" step="0.01" defaultValue={defaults?.costPerKm ?? undefined} />
+        </div>
+        <div>
+          <label className="label" htmlFor="fuelLevelPercent">Niveau de gasoil (%)</label>
+          <input
+            className="input"
+            id="fuelLevelPercent"
+            name="fuelLevelPercent"
+            type="number"
+            min={0}
+            max={100}
+            defaultValue={defaults?.fuelLevelPercent ?? undefined}
+          />
+        </div>
+        <div>
+          <label className="label" htmlFor="adBlueLevelPercent">Niveau AdBlue (%)</label>
+          <input
+            className="input"
+            id="adBlueLevelPercent"
+            name="adBlueLevelPercent"
+            type="number"
+            min={0}
+            max={100}
+            defaultValue={defaults?.adBlueLevelPercent ?? undefined}
+          />
         </div>
         <div className="flex items-end pb-2">
           <label className="flex items-center gap-2 text-sm text-slate-700">

@@ -37,6 +37,8 @@ export const tractorSchema = z.object({
   technicalControlExpiry: z.string().optional().or(z.literal("")),
   costPerKm: z.coerce.number().optional(),
   hazmatCertified: z.coerce.boolean().default(false),
+  fuelLevelPercent: z.coerce.number().int().min(0).max(100).optional(),
+  adBlueLevelPercent: z.coerce.number().int().min(0).max(100).optional(),
   notes: z.string().optional().or(z.literal("")),
 });
 

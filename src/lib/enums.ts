@@ -25,7 +25,8 @@ export type RecommendationCategory =
   | "TRIP_REMINDER"
   | "COMPLIANCE"
   | "ORDER_BACKLOG"
-  | "UTILIZATION";
+  | "UTILIZATION"
+  | "FUEL_LEVEL";
 
 export type RecommendationEntityType = "TRACTOR" | "TRAILER" | "DRIVER" | "TRIP" | "ORDER";
 

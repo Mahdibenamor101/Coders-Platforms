@@ -21,6 +21,8 @@ function parseTractorForm(formData: FormData) {
     notes: formData.get("notes") ?? "",
     costPerKm: formData.get("costPerKm") || undefined,
     hazmatCertified: formData.get("hazmatCertified") === "on",
+    fuelLevelPercent: formData.get("fuelLevelPercent") || undefined,
+    adBlueLevelPercent: formData.get("adBlueLevelPercent") || undefined,
   });
 }
 
@@ -49,6 +51,8 @@ export async function createTractorAction(_prev: FormState, formData: FormData):
       notes: data.notes || null,
       costPerKm: data.costPerKm ?? null,
       hazmatCertified: data.hazmatCertified,
+      fuelLevelPercent: data.fuelLevelPercent ?? null,
+      adBlueLevelPercent: data.adBlueLevelPercent ?? null,
     },
   });
 
@@ -85,6 +89,8 @@ export async function updateTractorAction(
       notes: data.notes || null,
       costPerKm: data.costPerKm ?? null,
       hazmatCertified: data.hazmatCertified,
+      fuelLevelPercent: data.fuelLevelPercent ?? null,
+      adBlueLevelPercent: data.adBlueLevelPercent ?? null,
     },
   });
 

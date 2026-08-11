@@ -4,7 +4,9 @@ import { prisma } from "@/lib/prisma";
 import { PageHeader } from "@/components/ui";
 import { TractorForm } from "@/components/forms/tractor-form";
 import { DeleteButton } from "@/components/delete-button";
+import { GpsDeviceCard } from "@/components/gps-device-card";
 import { updateTractorAction, deleteTractorAction } from "@/lib/actions/tractor-actions";
+import { regenerateTractorGpsTokenAction } from "@/lib/actions/gps-actions";
 import { toDateInputValue, formatDate } from "@/lib/format";
 
 export default async function EditTractorPage({ params }: { params: { id: string } }) {
@@ -19,8 +21,14 @@ export default async function EditTractorPage({ params }: { params: { id: string
     orderBy: { performedAt: "desc" },
   });
 
+  const lastPosition = await prisma.vehiclePosition.findFirst({
+    where: { tractorId: tractor.id },
+    orderBy: { recordedAt: "desc" },
+  });
+
   const boundUpdate = updateTractorAction.bind(null, tractor.id);
   const boundDelete = deleteTractorAction.bind(null, tractor.id);
+  const boundRegenerateGps = regenerateTractorGpsTokenAction.bind(null, tractor.id);
 
   return (
     <div className="mx-auto max-w-2xl space-y-8">
@@ -43,7 +51,15 @@ export default async function EditTractorPage({ params }: { params: { id: string
           notes: tractor.notes,
           costPerKm: tractor.costPerKm,
           hazmatCertified: tractor.hazmatCertified,
+          fuelLevelPercent: tractor.fuelLevelPercent,
+          adBlueLevelPercent: tractor.adBlueLevelPercent,
         }}
+      />
+
+      <GpsDeviceCard
+        token={tractor.gpsDeviceToken}
+        lastPosition={lastPosition}
+        regenerateAction={boundRegenerateGps}
       />
 
       <div className="card p-6">

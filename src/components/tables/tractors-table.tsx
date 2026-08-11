@@ -15,7 +15,24 @@ type TractorRow = {
   nextMaintenanceMileage: number | null;
   technicalControlExpiry: Date | null;
   status: string;
+  fuelLevelPercent: number | null;
+  adBlueLevelPercent: number | null;
 };
+
+function levelColorClass(percent: number) {
+  if (percent < 15) return "text-red-600";
+  if (percent < 30) return "text-amber-600";
+  return "text-slate-600";
+}
+
+function LevelGauge({ label, percent }: { label: string; percent: number | null }) {
+  if (percent === null) return <span className="text-xs text-slate-300">-</span>;
+  return (
+    <span className={`text-xs font-medium ${levelColorClass(percent)}`}>
+      {label} {percent}%
+    </span>
+  );
+}
 
 export function TractorsTable({ tractors }: { tractors: TractorRow[] }) {
   return (
@@ -38,6 +55,7 @@ export function TractorsTable({ tractors }: { tractors: TractorRow[] }) {
                 <th className="px-4 py-3">Kilometrage</th>
                 <th className="px-4 py-3">Prochain entretien</th>
                 <th className="px-4 py-3">Controle technique</th>
+                <th className="px-4 py-3">Niveaux</th>
                 <th className="px-4 py-3">Statut</th>
                 <th className="px-4 py-3"></th>
               </tr>
@@ -57,6 +75,12 @@ export function TractorsTable({ tractors }: { tractors: TractorRow[] }) {
                       : "-"}
                   </td>
                   <td className="px-4 py-3">{formatDate(t.technicalControlExpiry)}</td>
+                  <td className="px-4 py-3">
+                    <div className="flex flex-col gap-0.5">
+                      <LevelGauge label="Gasoil" percent={t.fuelLevelPercent} />
+                      <LevelGauge label="AdBlue" percent={t.adBlueLevelPercent} />
+                    </div>
+                  </td>
                   <td className="px-4 py-3">
                     <StatusBadge status={t.status} />
                   </td>

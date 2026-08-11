@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import type { DriverMarker, RouteLine } from "./fleet-map";
+import type { DriverMarker, VehicleMarker, RouteLine } from "./fleet-map";
 
 const FleetMap = dynamic(() => import("./fleet-map").then((m) => m.FleetMap), {
   ssr: false,
@@ -14,6 +14,7 @@ const FleetMap = dynamic(() => import("./fleet-map").then((m) => m.FleetMap), {
 
 export function FleetMapClient(props: {
   drivers: DriverMarker[];
+  vehicles?: VehicleMarker[];
   routes: RouteLine[];
   center: [number, number];
 }) {

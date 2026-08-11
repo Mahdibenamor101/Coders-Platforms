@@ -13,6 +13,10 @@ const LONG_HAUL_HOURS = 9;
 const ORDER_BACKLOG_WARNING_HOURS = 48;
 const ORDER_BACKLOG_CRITICAL_HOURS = 24 * 7;
 const DRIVER_INACTIVITY_DAYS = 14;
+const FUEL_CRITICAL_PERCENT = 10;
+const FUEL_WARNING_PERCENT = 20;
+const ADBLUE_CRITICAL_PERCENT = 5;
+const ADBLUE_WARNING_PERCENT = 15;
 
 type DraftRecommendation = {
   entityType: RecommendationEntityType;
@@ -151,6 +155,33 @@ export async function generateRecommendationsForCompany(companyId: string) {
           dueAt: tractor.insuranceExpiry,
         });
       }
+    }
+
+    if (tractor.fuelLevelPercent != null && tractor.fuelLevelPercent <= FUEL_WARNING_PERCENT) {
+      drafts.push({
+        entityType: "TRACTOR",
+        entityId: tractor.id,
+        entityLabel: label,
+        severity: tractor.fuelLevelPercent <= FUEL_CRITICAL_PERCENT ? "CRITICAL" : "WARNING",
+        category: "FUEL_LEVEL",
+        title: "Niveau de gasoil bas",
+        message: `${label} est a ${tractor.fuelLevelPercent}% de gasoil. Prevoyez un plein avant la prochaine mission.`,
+      });
+    }
+
+    if (
+      tractor.adBlueLevelPercent != null &&
+      tractor.adBlueLevelPercent <= ADBLUE_WARNING_PERCENT
+    ) {
+      drafts.push({
+        entityType: "TRACTOR",
+        entityId: tractor.id,
+        entityLabel: label,
+        severity: tractor.adBlueLevelPercent <= ADBLUE_CRITICAL_PERCENT ? "CRITICAL" : "WARNING",
+        category: "FUEL_LEVEL",
+        title: "Niveau AdBlue bas",
+        message: `${label} est a ${tractor.adBlueLevelPercent}% d'AdBlue. Un niveau trop bas peut bloquer le demarrage du moteur.`,
+      });
     }
 
     if (tractor.technicalControlExpiry) {

@@ -30,6 +30,8 @@ model Company {
   trips             Trip[]
   orders            Order[]
   driverPositions   DriverPosition[]
+  vehiclePositions  VehiclePosition[]
+  dashcamVideos     DashcamVideo[]
   maintenanceRecords MaintenanceRecord[]
   recommendations   Recommendation[]
   whatsappMessages  WhatsAppMessage[]
@@ -68,6 +70,7 @@ model Driver {
 
   trips           Trip[]
   driverPositions DriverPosition[]
+  dashcamVideos   DashcamVideo[]
 
   @@index([companyId])
 }
@@ -93,8 +96,13 @@ model Tractor {
   createdAt                DateTime      @default(now())
   updatedAt                DateTime      @updatedAt
 
+  fuelLevelPercent         Int?
+  adBlueLevelPercent       Int?
+  gpsDeviceToken           String?       @unique @default(cuid())
+
   trips              Trip[]
   maintenanceRecords  MaintenanceRecord[]
+  vehiclePositions   VehiclePosition[]
 
   @@index([companyId])
 }
@@ -111,11 +119,13 @@ model Trailer {
   nextInspectionDate  DateTime?
   insuranceExpiry     DateTime?
   notes               String?
+  gpsDeviceToken      String?       @unique @default(cuid())
   createdAt           DateTime      @default(now())
   updatedAt           DateTime      @updatedAt
 
   trips              Trip[]
   maintenanceRecords  MaintenanceRecord[]
+  vehiclePositions   VehiclePosition[]
 
   @@index([companyId])
 }
@@ -145,7 +155,8 @@ model Trip {
   createdAt             DateTime   @default(now())
   updatedAt             DateTime   @updatedAt
 
-  orders Order[]
+  orders        Order[]
+  dashcamVideos DashcamVideo[]
 
   @@index([companyId])
   @@index([tractorId])
@@ -207,6 +218,53 @@ model DriverPosition {
 
   @@index([companyId])
   @@index([driverId])
+}
+
+// Positions reported by a physical GPS tracker installed on the vehicle
+// itself (authenticated via Tractor/Trailer.gpsDeviceToken), independent of
+// whether a driver's phone is reporting via DriverPosition. See
+// /api/gps/[token]/position and the README for the device webhook format.
+model VehiclePosition {
+  id         String   @id @default(cuid())
+  companyId  String
+  company    Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  tractorId  String?
+  tractor    Tractor? @relation(fields: [tractorId], references: [id], onDelete: Cascade)
+  trailerId  String?
+  trailer    Trailer? @relation(fields: [trailerId], references: [id], onDelete: Cascade)
+  lat        Float
+  lng        Float
+  speedKmh   Float?
+  heading    Float?
+  recordedAt DateTime @default(now())
+
+  @@index([companyId])
+  @@index([tractorId])
+  @@index([trailerId])
+}
+
+// Dashcam video segments recorded from the driver's phone camera during a
+// trip (driver portal), uploaded to object storage. A daily cron
+// (/api/cron/dashcam-cleanup) deletes segments older than 3 days that were
+// never marked downloaded, so storage doesn't grow unbounded.
+model DashcamVideo {
+  id           String    @id @default(cuid())
+  companyId    String
+  company      Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  tripId       String?
+  trip         Trip?     @relation(fields: [tripId], references: [id], onDelete: SetNull)
+  driverId     String?
+  driver       Driver?   @relation(fields: [driverId], references: [id], onDelete: SetNull)
+  videoUrl     String
+  segmentIndex Int       @default(0)
+  durationSec  Int?
+  recordedAt   DateTime  @default(now())
+  downloaded   Boolean   @default(false)
+  downloadedAt DateTime?
+
+  @@index([companyId])
+  @@index([tripId])
+  @@index([recordedAt])
 }
 
 model MaintenanceRecord {

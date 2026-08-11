@@ -3,6 +3,7 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { StatusBadge } from "@/components/ui";
 import { LocationReporter } from "@/components/location-reporter";
+import { DashcamRecorder } from "@/components/dashcam-recorder";
 import { formatDateTime } from "@/lib/format";
 
 export default async function DriverPortalPage({ params }: { params: { token: string } }) {
@@ -45,6 +46,12 @@ export default async function DriverPortalPage({ params }: { params: { token: st
               <p className="mb-3 text-xs text-slate-500">
                 Depart {formatDateTime(trip.departureAt)} · {trip.origin} → {trip.destination}
               </p>
+
+              {trip.status === "IN_PROGRESS" && (
+                <div className="mb-3">
+                  <DashcamRecorder token={params.token} tripId={trip.id} />
+                </div>
+              )}
 
               {trip.orders.length === 0 ? (
                 <p className="text-sm text-slate-500">Aucun arret assigne.</p>

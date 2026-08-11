@@ -15,7 +15,8 @@ intelligentes generees automatiquement.
 - **Authentification** : inscription / connexion par email + mot de passe
   (session JWT en cookie httpOnly).
 - **Tracteurs** : immatriculation, kilometrage, statut, assurance, controle
-  technique, historique d'entretien.
+  technique, historique d'entretien, **niveaux de gasoil et d'AdBlue** (saisis
+  manuellement, avec recommandation automatique en dessous de 20%/15%).
 - **Remorques** : type (tautliner, frigorifique, plateau, citerne, ...),
   capacite, statut, inspections.
 - **Chauffeurs** : coordonnees WhatsApp, permis de conduire, statut.
@@ -57,6 +58,20 @@ intelligentes generees automatiquement.
 - **Carte live** (Leaflet + OpenStreetMap, sans cle API) : position des
   chauffeurs (relevee automatiquement par le portail conducteur toutes les
   30s) et trace des tournees actives avec ETA.
+- **Position GPS materielle des vehicules** : chaque tracteur/remorque a un
+  token dedie et une URL de webhook (`/api/gps/<token>/position`, visible sur
+  sa fiche) a configurer sur un vrai boitier GPS (Teltonika, Geotab, ou tout
+  materiel capable d'appeler une URL HTTP). Independant de la position du
+  telephone du chauffeur ; affiche sur la carte live avec une icone distincte.
+- **Dashcam** : pendant une mission en cours, le chauffeur peut lancer
+  l'enregistrement video depuis son telephone (portail conducteur). Les
+  segments (2 min) sont uploades au fur et a mesure et visibles sur la fiche
+  de la mission (lecture + telechargement). *Limite connue : l'enregistrement
+  necessite que l'onglet du navigateur reste ouvert et au premier plan
+  (les navigateurs mobiles suspendent l'enregistrement en arriere-plan/ecran
+  verrouille) ; consomme des donnees mobiles et du stockage.* Les segments
+  non telecharges sont supprimes automatiquement au bout de 3 jours
+  (`/api/cron/dashcam-cleanup`).
 - **Portail conducteur (PWA web)** : lien personnel par chauffeur
   (`/driver/<token>`), sans compte a creer. Le chauffeur y voit ses tournees et
   arrets du jour, peut demarrer une livraison, capturer une **preuve de
@@ -73,9 +88,8 @@ intelligentes generees automatiquement.
 - **Next.js 14** (App Router) + TypeScript + Tailwind CSS
 - **Framer Motion** + **lucide-react** pour les animations et icones de la
   page d'accueil publique.
-- **Prisma** + SQLite (fichier local, aucune base externe requise pour
-  demarrer). Le `datasource` peut etre bascule vers PostgreSQL/MySQL en
-  production en changeant `provider` et `DATABASE_URL`.
+- **Prisma** + **PostgreSQL** (necessite une instance locale ou distante, voir
+  "Demarrage").
 - **Auth** : JWT (`jose`) + `bcryptjs`, sans dependance externe.
 - **WhatsApp** : API Cloud de Meta (`graph.facebook.com`), integration prete a
   l'emploi des que les identifiants sont renseignes dans les Parametres.
@@ -150,9 +164,10 @@ Parametres) afin de ne jamais bloquer l'utilisation de l'application.
      envoyes aux chauffeurs et clients.
    - `BLOB_READ_WRITE_TOKEN` — creez un store dans l'onglet **Storage** →
      **Create Database** → **Blob**, puis copiez le token genere. Necessaire
-     pour que les photos de preuve de livraison persistent (le disque local
-     n'est pas fiable en serverless) ; sans ce token, l'app fonctionne mais
-     revient au stockage disque local (non persistant en production).
+     pour que les photos de preuve de livraison et les videos dashcam
+     persistent (le disque local n'est pas fiable en serverless) ; sans ce
+     token, l'app fonctionne mais revient au stockage disque local (non
+     persistant en production).
    - `WHATSAPP_DEFAULT_PHONE_NUMBER_ID` / `WHATSAPP_DEFAULT_ACCESS_TOKEN` —
      optionnel, seulement si vous voulez des valeurs par defaut au niveau
      plateforme (chaque entreprise peut aussi configurer les siennes dans
@@ -165,9 +180,10 @@ Parametres) afin de ne jamais bloquer l'utilisation de l'application.
    ```bash
    DATABASE_URL="<chaine de connexion production>" npx prisma db push
    ```
-6. Le cron de recommandations (`vercel.json`, `/api/cron/recommendations`,
-   tous les jours a 6h) est active automatiquement sur les projets Vercel Pro ;
-   sur le plan Hobby, appelez-le manuellement ou via un service cron externe.
+6. Les crons (`vercel.json`) — recommandations (`/api/cron/recommendations`,
+   6h) et nettoyage des videos dashcam (`/api/cron/dashcam-cleanup`, 3h) —
+   sont actifs automatiquement sur les projets Vercel Pro ; sur le plan
+   Hobby, appelez-les manuellement ou via un service cron externe.
 
 ## Scripts utiles
 
@@ -215,3 +231,11 @@ src/app/api/driver/        endpoint de remontee de position GPS
   ralentit le brute force sur un seul serveur mais ne partage pas l'etat entre
   plusieurs instances serverless. A remplacer par un store partage (Redis,
   Upstash) si le trafic le justifie.
+- La position GPS des vehicules (tracteurs/remorques) n'est disponible que si
+  un boitier GPS physique est installe et configure pour appeler le webhook
+  `/api/gps/<token>/position` — sans materiel, seule la position du telephone
+  du chauffeur (portail conducteur) est disponible.
+- L'enregistrement dashcam utilise la camera du telephone via le navigateur
+  (pas de vrai boitier dashcam) : il s'arrete si l'ecran se verrouille ou si
+  l'onglet passe en arriere-plan (limite des navigateurs mobiles), et
+  consomme des donnees mobiles + du stockage cloud.

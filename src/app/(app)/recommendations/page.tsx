@@ -17,6 +17,7 @@ const CATEGORY_LABELS: Record<string, string> = {
   COMPLIANCE: "Conformite",
   ORDER_BACKLOG: "Commande en attente",
   UTILIZATION: "Utilisation",
+  FUEL_LEVEL: "Niveau carburant",
 };
 
 const SEVERITY_ORDER: Record<string, number> = { CRITICAL: 0, WARNING: 1, INFO: 2 };

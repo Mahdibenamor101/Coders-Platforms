@@ -3,24 +3,33 @@ import { prisma } from "@/lib/prisma";
 import { PageHeader } from "@/components/ui";
 import { FleetMapClient } from "@/components/fleet-map-client";
 import { LiveRefresh } from "@/components/live-refresh";
-import type { DriverMarker, RouteLine } from "@/components/fleet-map";
+import type { DriverMarker, VehicleMarker, RouteLine } from "@/components/fleet-map";
 
 const FALLBACK_CENTER: [number, number] = [31.7917, -7.0926];
 
 export default async function LivePage() {
   const session = await requireSession();
 
-  const [company, driversWithPositions, activeTrips] = await Promise.all([
-    prisma.company.findUniqueOrThrow({ where: { id: session.companyId } }),
-    prisma.driver.findMany({
-      where: { companyId: session.companyId },
-      include: { driverPositions: { orderBy: { recordedAt: "desc" }, take: 1 } },
-    }),
-    prisma.trip.findMany({
-      where: { companyId: session.companyId, status: { in: ["PLANNED", "IN_PROGRESS"] } },
-      include: { driver: true },
-    }),
-  ]);
+  const [company, driversWithPositions, activeTrips, tractorsWithPositions, trailersWithPositions] =
+    await Promise.all([
+      prisma.company.findUniqueOrThrow({ where: { id: session.companyId } }),
+      prisma.driver.findMany({
+        where: { companyId: session.companyId },
+        include: { driverPositions: { orderBy: { recordedAt: "desc" }, take: 1 } },
+      }),
+      prisma.trip.findMany({
+        where: { companyId: session.companyId, status: { in: ["PLANNED", "IN_PROGRESS"] } },
+        include: { driver: true },
+      }),
+      prisma.tractor.findMany({
+        where: { companyId: session.companyId },
+        include: { vehiclePositions: { orderBy: { recordedAt: "desc" }, take: 1 } },
+      }),
+      prisma.trailer.findMany({
+        where: { companyId: session.companyId },
+        include: { vehiclePositions: { orderBy: { recordedAt: "desc" }, take: 1 } },
+      }),
+    ]);
 
   const tripStatusByDriverId = new Map(activeTrips.map((t) => [t.driverId, t.status]));
 
@@ -37,6 +46,35 @@ export default async function LivePage() {
         status: tripStatusByDriverId.get(d.id) ?? d.status,
       };
     });
+
+  const vehicles: VehicleMarker[] = [
+    ...tractorsWithPositions
+      .filter((t) => t.vehiclePositions.length > 0)
+      .map((t) => {
+        const pos = t.vehiclePositions[0];
+        return {
+          id: t.id,
+          label: `${t.brand} ${t.model} (${t.plateNumber})`,
+          kind: "tractor" as const,
+          lat: pos.lat,
+          lng: pos.lng,
+          recordedAt: pos.recordedAt.toISOString(),
+        };
+      }),
+    ...trailersWithPositions
+      .filter((t) => t.vehiclePositions.length > 0)
+      .map((t) => {
+        const pos = t.vehiclePositions[0];
+        return {
+          id: t.id,
+          label: `Remorque ${t.plateNumber}`,
+          kind: "trailer" as const,
+          lat: pos.lat,
+          lng: pos.lng,
+          recordedAt: pos.recordedAt.toISOString(),
+        };
+      }),
+  ];
 
   const routes: RouteLine[] = activeTrips
     .filter((t) => t.routeGeometry)
@@ -70,11 +108,14 @@ export default async function LivePage() {
           <span className="font-semibold text-slate-800">{drivers.length}</span> chauffeur(s) localise(s)
         </div>
         <div>
+          <span className="font-semibold text-slate-800">{vehicles.length}</span> vehicule(s) avec boitier GPS
+        </div>
+        <div>
           <span className="font-semibold text-slate-800">{routes.length}</span> tournee(s) active(s) affichee(s)
         </div>
       </div>
       <div className="card h-[600px] overflow-hidden p-0">
-        <FleetMapClient drivers={drivers} routes={routes} center={center} />
+        <FleetMapClient drivers={drivers} vehicles={vehicles} routes={routes} center={center} />
       </div>
       {activeTrips.length > 0 && (
         <div className="card mt-4 p-4">

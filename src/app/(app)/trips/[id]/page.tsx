@@ -4,11 +4,13 @@ import { prisma } from "@/lib/prisma";
 import { PageHeader, StatusBadge } from "@/components/ui";
 import { DeleteButton } from "@/components/delete-button";
 import { OrderStopList } from "@/components/order-stop-list";
+import { DashcamDownloadLink } from "@/components/dashcam-download-link";
 import {
   notifyTripDriverAction,
   updateTripStatusAction,
   deleteTripAction,
 } from "@/lib/actions/trip-actions";
+import { markDashcamDownloadedAction } from "@/lib/actions/dashcam-actions";
 import { formatDateTime } from "@/lib/format";
 
 export default async function TripDetailPage({ params }: { params: { id: string } }) {
@@ -28,6 +30,11 @@ export default async function TripDetailPage({ params }: { params: { id: string 
     where: { companyId: session.companyId, driverId: trip.driverId },
     orderBy: { createdAt: "desc" },
     take: 5,
+  });
+
+  const dashcamVideos = await prisma.dashcamVideo.findMany({
+    where: { companyId: session.companyId, tripId: trip.id },
+    orderBy: { segmentIndex: "asc" },
   });
 
   const boundNotify = notifyTripDriverAction.bind(null, trip.id);
@@ -107,6 +114,33 @@ export default async function TripDetailPage({ params }: { params: { id: string 
               priority: o.priority,
             }))}
           />
+        </div>
+      )}
+
+      {dashcamVideos.length > 0 && (
+        <div className="card p-6">
+          <h2 className="mb-1 text-base font-semibold text-slate-900">Videos dashcam</h2>
+          <p className="mb-4 text-sm text-slate-500">
+            Enregistrees depuis le telephone du chauffeur pendant la mission. Supprimees
+            automatiquement au bout de 3 jours, sauf telechargement.
+          </p>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            {dashcamVideos.map((video) => (
+              <div key={video.id} className="rounded-lg border border-slate-100 p-3">
+                <video controls src={video.videoUrl} className="w-full rounded bg-slate-900" />
+                <div className="mt-2 flex items-center justify-between">
+                  <div className="text-xs text-slate-500">
+                    Segment {video.segmentIndex + 1} · {formatDateTime(video.recordedAt)}
+                    {video.downloaded && <span className="ml-1 text-emerald-600">· conservee</span>}
+                  </div>
+                  <DashcamDownloadLink
+                    videoUrl={video.videoUrl}
+                    markDownloadedAction={markDashcamDownloadedAction.bind(null, video.id)}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       )}
 
