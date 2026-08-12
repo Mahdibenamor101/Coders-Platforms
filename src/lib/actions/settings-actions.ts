@@ -62,7 +62,7 @@ export async function sendTestWhatsAppAction() {
   await sendWhatsAppMessage({
     companyId: session.companyId,
     toPhone: recipient,
-    body: `Message de test FleetLink pour ${company.name}. La configuration WhatsApp fonctionne.`,
+    body: `Message de test LOGISTICS@MAHDI pour ${company.name}. La configuration WhatsApp fonctionne.`,
     type: "CUSTOM",
   });
 

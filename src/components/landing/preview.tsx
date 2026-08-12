@@ -34,7 +34,7 @@ export function LandingPreview() {
             Decouvrez l&apos;application en images
           </h2>
           <p className="mt-4 text-lg text-slate-600">
-            De vraies captures d&apos;ecran de FleetLink, telles que vos dispatchers et vos chauffeurs
+            De vraies captures d&apos;ecran de LOGISTICS@MAHDI, telles que vos dispatchers et vos chauffeurs
             les verront.
           </p>
         </motion.div>
@@ -104,7 +104,7 @@ export function LandingPreview() {
               <div className="relative aspect-[430/780] w-full overflow-hidden rounded-[1.3rem] bg-white">
                 <Image
                   src="/screenshots/driver-portal.png"
-                  alt="Portail conducteur mobile FleetLink"
+                  alt="Portail conducteur mobile LOGISTICS@MAHDI"
                   fill
                   sizes="260px"
                   className="object-cover object-top"

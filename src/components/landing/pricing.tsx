@@ -10,7 +10,7 @@ const PLANS = [
   {
     name: "Decouverte",
     icon: Truck,
-    tagline: "Pour tester FleetLink sans engagement",
+    tagline: "Pour tester LOGISTICS@MAHDI sans engagement",
     price: { monthly: 0, annual: 0 },
     priceSuffix: "",
     cta: "Commencer gratuitement",

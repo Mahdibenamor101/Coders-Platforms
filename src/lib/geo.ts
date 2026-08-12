@@ -12,7 +12,7 @@ const EARTH_RADIUS_KM = 6371;
 /** Straight-line distances underestimate real road distance; this factor approximates road detour. */
 const ROAD_DETOUR_FACTOR = 1.3;
 const ASSUMED_AVERAGE_SPEED_KMH = 55;
-const NOMINATIM_USER_AGENT = "FleetLink-SaaS/1.0 (fleet management demo)";
+const NOMINATIM_USER_AGENT = "LogisticsMahdi-SaaS/1.0 (fleet management demo)";
 
 export function haversineKm(a: LatLng, b: LatLng): number {
   const toRad = (deg: number) => (deg * Math.PI) / 180;

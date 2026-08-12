@@ -1,4 +1,4 @@
-# FleetLink
+# LOGISTICS@MAHDI
 
 SaaS de gestion logistique pour tracteurs et remorques : suivi de flotte,
 missions, entretien, notifications WhatsApp aux chauffeurs et recommandations
@@ -142,6 +142,36 @@ d'environnement `WHATSAPP_DEFAULT_PHONE_NUMBER_ID` et
 simules et journalises (visible dans le journal des messages, page
 Parametres) afin de ne jamais bloquer l'utilisation de l'application.
 
+## Connexion avec Google (optionnel)
+
+Le bouton **Continuer avec Google** sur les pages de connexion/inscription
+fonctionne des que ces deux variables d'environnement sont renseignees ;
+sans elles, le bouton affiche un message d'erreur clair au lieu de planter.
+
+1. Allez sur [Google Cloud Console](https://console.cloud.google.com/apis/credentials)
+   et creez (ou selectionnez) un projet.
+2. **OAuth consent screen** : configurez l'ecran de consentement (type
+   "External" pour un usage public), avec le nom de l'application
+   (`LOGISTICS@MAHDI`) et votre email de contact.
+3. **Credentials → Create Credentials → OAuth client ID**, type
+   **Web application**.
+4. Sous **Authorized redirect URIs**, ajoutez :
+   - `http://localhost:3000/api/auth/google/callback` (developpement local)
+   - `https://votre-domaine.com/api/auth/google/callback` (production)
+5. Copiez le **Client ID** et le **Client Secret** generes dans `.env` :
+   ```
+   GOOGLE_CLIENT_ID="....apps.googleusercontent.com"
+   GOOGLE_CLIENT_SECRET="...."
+   ```
+6. En production (Vercel/Railway/...), ajoutez ces memes variables dans les
+   parametres d'environnement du projet, avec l'URI de redirection de
+   production ajoutee a l'etape 4.
+
+Premiere connexion via Google : si l'email n'existe pas encore, une nouvelle
+entreprise est creee automatiquement (compte administrateur). Si l'email
+correspond a un compte existant (cree par email/mot de passe), le compte
+Google est simplement associe a ce compte au lieu d'en creer un nouveau.
+
 ## Deploiement en production (Vercel)
 
 1. **Poussez le repo sur GitHub** (deja fait si vous travaillez depuis cette
@@ -172,6 +202,10 @@ Parametres) afin de ne jamais bloquer l'utilisation de l'application.
      optionnel, seulement si vous voulez des valeurs par defaut au niveau
      plateforme (chaque entreprise peut aussi configurer les siennes dans
      **Parametres**).
+   - `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` — optionnel, pour activer
+     "Continuer avec Google" (voir section dediee plus haut). N'oubliez pas
+     d'ajouter `https://votre-domaine/api/auth/google/callback` aux URI de
+     redirection autorisees dans Google Cloud Console.
 4. **Premier deploiement** : cliquez **Deploy**. Vercel installe les
    dependances (`postinstall` lance `prisma generate` automatiquement) et
    build l'application.

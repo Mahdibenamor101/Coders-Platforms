@@ -123,7 +123,7 @@ export function LandingFeatures() {
             Tout ce qu&apos;il faut pour piloter votre logistique
           </h2>
           <p className="mt-4 text-lg text-slate-600">
-            De la fiche vehicule a la preuve de livraison, FleetLink couvre l&apos;ensemble du cycle de
+            De la fiche vehicule a la preuve de livraison, LOGISTICS@MAHDI couvre l&apos;ensemble du cycle de
             vie d&apos;une tournee.
           </p>
         </motion.div>

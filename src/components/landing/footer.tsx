@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { Truck, Lock, ShieldCheck } from "lucide-react";
+import { Lock, ShieldCheck } from "lucide-react";
+import { Logo } from "@/components/logo";
 
 const PRODUCT_LINKS = [
   { label: "Fonctionnalites", href: "#features" },
@@ -19,10 +20,7 @@ export function LandingFooter() {
       <div className="mx-auto max-w-6xl px-6">
         <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-4">
           <div>
-            <div className="flex items-center gap-2 text-lg font-bold text-white">
-              <Truck className="h-5 w-5" />
-              FleetLink
-            </div>
+            <Logo size={30} variant="dark" textClassName="text-base" />
             <p className="mt-3 max-w-xs text-sm text-slate-500">
               La plateforme de gestion logistique pour flottes de tracteurs et remorques.
             </p>
@@ -71,7 +69,7 @@ export function LandingFooter() {
 
         <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-slate-800 pt-8 sm:flex-row">
           <p className="text-xs text-slate-500">
-            &copy; {new Date().getFullYear()} FleetLink. Tous droits reserves.
+            &copy; {new Date().getFullYear()} LOGISTICS@MAHDI. Tous droits reserves.
           </p>
           <div className="flex flex-wrap items-center gap-2">
             {["Visa", "Mastercard", "Stripe"].map((method) => (

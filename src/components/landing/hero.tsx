@@ -48,7 +48,7 @@ export function LandingHero() {
             transition={{ duration: 0.6, delay: 0.15 }}
             className="mt-6 max-w-xl text-lg text-slate-600"
           >
-            FleetLink centralise vos tracteurs, remorques et chauffeurs, planifie vos tournees
+            LOGISTICS@MAHDI centralise vos tracteurs, remorques et chauffeurs, planifie vos tournees
             automatiquement, notifie vos chauffeurs et vos clients par WhatsApp, et vous alerte avant
             que les problemes n&apos;arrivent.
           </motion.p>

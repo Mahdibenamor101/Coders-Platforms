@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { logoutAction } from "@/lib/actions/auth-actions";
+import { Logo } from "@/components/logo";
 
 const NAV_ITEMS = [
   { href: "/dashboard", label: "Tableau de bord", icon: "▦" },
@@ -32,8 +33,8 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     <div className="flex min-h-screen bg-slate-50">
       <aside className="flex w-64 shrink-0 flex-col border-r border-slate-200 bg-white">
         <div className="border-b border-slate-200 px-5 py-5">
-          <div className="text-lg font-bold text-emerald-700">FleetLink</div>
-          <div className="truncate text-xs text-slate-500">{company?.name}</div>
+          <Logo size={28} textClassName="text-sm" />
+          <div className="mt-1 truncate text-xs text-slate-500">{company?.name}</div>
         </div>
         <nav className="flex-1 space-y-1 px-3 py-4">
           {NAV_ITEMS.map((item) => (

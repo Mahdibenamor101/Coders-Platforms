@@ -43,6 +43,7 @@ model User {
   company      Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
   email        String   @unique
   passwordHash String
+  googleId     String?  @unique
   name         String
   role         String   @default("ADMIN")
   createdAt    DateTime @default(now())

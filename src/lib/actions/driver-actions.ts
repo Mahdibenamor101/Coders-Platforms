@@ -102,7 +102,7 @@ export async function sendDriverPortalLinkAction(driverId: string) {
   await sendWhatsAppMessage({
     companyId: session.companyId,
     toPhone: driver.phone,
-    body: `Bonjour ${driver.firstName}, voici votre lien personnel FleetLink pour suivre vos missions du jour : ${link}`,
+    body: `Bonjour ${driver.firstName}, voici votre lien personnel LOGISTICS@MAHDI pour suivre vos missions du jour : ${link}`,
     type: "CUSTOM",
     driverId: driver.id,
   });

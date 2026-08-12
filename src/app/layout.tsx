@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 
-const title = "FleetLink - Gestion logistique tracteurs & remorques";
+const title = "LOGISTICS@MAHDI - Gestion logistique tracteurs & remorques";
 const description =
   "SaaS de gestion de flotte : tracteurs, remorques, chauffeurs, missions, planification automatique, notifications WhatsApp et recommandations intelligentes.";
 
@@ -16,7 +16,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport = {
-  themeColor: "#059669",
+  themeColor: "#0d5c42",
   width: "device-width",
   initialScale: 1,
 };

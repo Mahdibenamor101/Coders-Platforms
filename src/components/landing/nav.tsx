@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, Truck } from "lucide-react";
+import { Menu, X } from "lucide-react";
+import { Logo } from "@/components/logo";
 
 const LINKS = [
   { href: "#preview", label: "Apercu" },
@@ -42,9 +43,8 @@ export function LandingNav() {
         }`}
       >
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-          <Link href="/" className="flex items-center gap-2 text-lg font-bold text-emerald-700">
-            <Truck className="h-6 w-6" strokeWidth={2.5} />
-            FleetLink
+          <Link href="/">
+            <Logo size={30} textClassName="text-base sm:text-lg" />
           </Link>
 
           <nav className="hidden items-center gap-8 md:flex">

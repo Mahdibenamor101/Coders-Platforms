@@ -1,7 +1,7 @@
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
 
-export const SESSION_COOKIE = "fleetlink_session";
+export const SESSION_COOKIE = "logistics_mahdi_session";
 
 export type SessionPayload = {
   userId: string;

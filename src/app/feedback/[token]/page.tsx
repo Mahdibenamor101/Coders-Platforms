@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { FeedbackForm } from "@/components/forms/feedback-form";
 import { submitFeedbackAction } from "@/lib/actions/feedback-actions";
+import { Logo } from "@/components/logo";
 
 export default async function FeedbackPage({ params }: { params: { token: string } }) {
   const order = await prisma.order.findUnique({ where: { feedbackToken: params.token } });
@@ -11,8 +12,8 @@ export default async function FeedbackPage({ params }: { params: { token: string
 
   return (
     <div className="mx-auto min-h-screen max-w-md bg-slate-50 px-4 py-10">
-      <header className="mb-6 text-center">
-        <div className="mb-2 text-2xl font-bold text-emerald-700">FleetLink</div>
+      <header className="mb-6 flex flex-col items-center text-center">
+        <Logo size={36} textClassName="text-lg" className="mb-3" />
         <p className="text-sm text-slate-500">
           Comment s&apos;est passee la livraison de votre commande {order.reference} ?
         </p>

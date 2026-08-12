@@ -8,7 +8,7 @@ const QUESTIONS = [
   {
     question: "Ai-je besoin d'un compte WhatsApp Business pour commencer ?",
     answer:
-      "Non. Sans configuration, FleetLink simule les envois WhatsApp (ils sont journalises mais non delivres) afin que vous puissiez tester toute l'application. Vous pouvez brancher un vrai compte WhatsApp Business (Meta Cloud API) a tout moment depuis les Parametres.",
+      "Non. Sans configuration, LOGISTICS@MAHDI simule les envois WhatsApp (ils sont journalises mais non delivres) afin que vous puissiez tester toute l'application. Vous pouvez brancher un vrai compte WhatsApp Business (Meta Cloud API) a tout moment depuis les Parametres.",
   },
   {
     question: "La planification automatique remplace-t-elle un dispatcher ?",
@@ -28,12 +28,12 @@ const QUESTIONS = [
   {
     question: "Mes donnees sont-elles isolees de celles des autres entreprises ?",
     answer:
-      "Oui. FleetLink est concu en multi-entreprise : chaque entreprise dispose de son propre espace et de ses propres donnees, strictement cloisonnees et accessibles uniquement a ses utilisateurs authentifies.",
+      "Oui. LOGISTICS@MAHDI est concu en multi-entreprise : chaque entreprise dispose de son propre espace et de ses propres donnees, strictement cloisonnees et accessibles uniquement a ses utilisateurs authentifies.",
   },
   {
     question: "La carte et les itineraires utilisent-ils une cle Google Maps payante ?",
     answer:
-      "Non. FleetLink s'appuie sur OpenStreetMap (cartes, geocodage et calcul d'itineraires), sans cle API ni cout supplementaire. Une integration avec un fournisseur specialise (routage poids lourd, matieres dangereuses) est possible sur le plan Entreprise.",
+      "Non. LOGISTICS@MAHDI s'appuie sur OpenStreetMap (cartes, geocodage et calcul d'itineraires), sans cle API ni cout supplementaire. Une integration avec un fournisseur specialise (routage poids lourd, matieres dangereuses) est possible sur le plan Entreprise.",
   },
 ];
 

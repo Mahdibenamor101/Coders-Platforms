@@ -1,11 +1,11 @@
 {
-  "name": "FleetLink",
-  "short_name": "FleetLink",
-  "description": "Portail conducteur FleetLink : missions, statut, preuve de livraison.",
+  "name": "LOGISTICS@MAHDI",
+  "short_name": "LOGISTICS@MAHDI",
+  "description": "Portail conducteur LOGISTICS@MAHDI : missions, statut, preuve de livraison.",
   "start_url": "/driver",
   "display": "standalone",
   "background_color": "#f4f6f8",
-  "theme_color": "#059669",
+  "theme_color": "#0d5c42",
   "icons": [
     { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
   ]
