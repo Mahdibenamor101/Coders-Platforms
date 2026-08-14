@@ -172,6 +172,81 @@ entreprise est creee automatiquement (compte administrateur). Si l'email
 correspond a un compte existant (cree par email/mot de passe), le compte
 Google est simplement associe a ce compte au lieu d'en creer un nouveau.
 
+## Connecter un traceur GPS materiel bon marche
+
+Chaque tracteur/remorque a un webhook dedie (`/api/gps/<token>/position`,
+visible sur sa fiche). Les traceurs GPS bon marche (10-35€) ne parlent
+generalement pas HTTP/JSON directement — ils utilisent un protocole
+proprietaire (GT06, TK103, Teltonika...). Il faut donc un pont :
+[Traccar](https://www.traccar.org) (gratuit, open-source) recoit le
+traceur, et le script `scripts/traccar-bridge.ts` relaie chaque position
+vers notre webhook.
+
+### 1. Choisir et installer le boitier
+
+- **Remorque** (pas d'alimentation garantie une fois decrochee) : preferez
+  un traceur **autonome sur batterie**, boitier etanche a fixation
+  magnetique (ex. traceurs "GT06/TK103" magnetiques vendus comme "traceur
+  GPS vehicule sans installation", 15-30€). Autonomie de plusieurs semaines
+  a quelques mois selon la frequence de relevé configuree.
+- **Tracteur** (batterie/alternateur disponibles) : un boitier cable comme
+  le Teltonika FMB920 (~25-35€) est plus fiable et se branche sur
+  l'allume-cigare ou directement sur la batterie.
+- Inserez une carte SIM data (un forfait IoT prepaye suffit, quelques Mo/mois).
+
+### 2. Heberger Traccar
+
+Le plus simple : un petit VPS (~5$/mois) avec Docker.
+
+```bash
+docker run -d --name traccar \
+  -p 8082:8082 -p 5000-5150:5000-5150/udp -p 5000-5150:5000-5150/tcp \
+  traccar/traccar:latest
+```
+
+Ouvrez `http://<votre-vps>:8082`, creez un compte administrateur, puis
+**Devices → Add** : renseignez l'IMEI du traceur (imprime sur le boitier ou
+dans sa notice) et le protocole correspondant (ex. `gt06`). Traccar assigne
+un `deviceId` numerique interne (visible dans l'URL de la fiche appareil) —
+notez-le, c'est la cle du mapping a l'etape 4.
+
+### 3. Vérifier que le traceur remonte bien dans Traccar
+
+Allumez le traceur, attendez qu'il capte le reseau mobile (quelques
+minutes). Sa position doit apparaitre sur la carte Traccar. Si rien
+n'apparait, verifiez que le port du protocole choisi est bien expose (voir
+la doc Traccar pour le port par protocole) et que la carte SIM a du credit
+data.
+
+### 4. Lancer le pont vers l'application
+
+Dans `.env` (ou les variables d'environnement de votre hebergement) :
+
+```
+TRACCAR_URL="http://<votre-vps>:8082"
+TRACCAR_EMAIL="admin@example.com"
+TRACCAR_PASSWORD="votre-mot-de-passe-traccar"
+TRACCAR_DEVICE_MAP={"<deviceId Traccar>":"<gpsDeviceToken du vehicule>"}
+```
+
+Le `gpsDeviceToken` de chaque vehicule est visible sur sa fiche (Tracteurs
+ou Remorques → fiche du vehicule → section "Position GPS"). Pour plusieurs
+vehicules, ajoutez plusieurs paires dans le JSON :
+`{"1":"token-remorque-1","2":"token-tracteur-3"}`.
+
+Puis lancez le pont (a garder actif en permanence, via `pm2`, `systemd`, ou
+un conteneur Docker a cote de Traccar) :
+
+```bash
+npm run gps:bridge
+```
+
+Il interroge Traccar toutes les 30s (`TRACCAR_POLL_INTERVAL_MS` pour
+ajuster) et relaie chaque nouvelle position au webhook du vehicule
+correspondant. Vous devriez voir le point apparaitre sur la **Carte live**
+de l'application, et "Dernier signal recu" se mettre a jour sur la fiche du
+vehicule.
+
 ## Deploiement en production (Vercel)
 
 1. **Poussez le repo sur GitHub** (deja fait si vous travaillez depuis cette
@@ -227,6 +302,9 @@ Google est simplement associe a ce compte au lieu d'en creer un nouveau.
 - `npm run db:seed` — recharge les donnees de demonstration
 - `npm run recommendations:run` — rejoue le moteur de recommandations pour
   toutes les entreprises (equivalent CLI de `/api/cron/recommendations`)
+- `npm run gps:bridge` — relaie en continu les positions d'un serveur
+  Traccar vers les webhooks GPS des vehicules (voir "Connecter un traceur
+  GPS materiel bon marche")
 
 ## Structure du projet
 
