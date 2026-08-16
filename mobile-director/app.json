@@ -1,0 +1,38 @@
+{
+  "expo": {
+    "name": "LOGISTICS@MAHDI Direction",
+    "slug": "logistics-mahdi-director",
+    "scheme": "logisticsmahdidirector",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "backgroundColor": "#f4f6f8",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.logisticsmahdi.director"
+    },
+    "android": {
+      "package": "com.logisticsmahdi.director",
+      "adaptiveIcon": {
+        "backgroundColor": "#0d5c42",
+        "foregroundImage": "./assets/android-icon-foreground.png"
+      },
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-secure-store",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash-icon.png",
+          "resizeMode": "contain",
+          "backgroundColor": "#0d5c42"
+        }
+      ]
+    ]
+  }
+}

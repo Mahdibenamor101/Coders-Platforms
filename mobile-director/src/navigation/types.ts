@@ -1,0 +1,22 @@
+export type RootStackParamList = {
+  Login: undefined;
+  Dashboard: undefined;
+  Tractors: undefined;
+  TractorForm: { tractorId?: string };
+  Trailers: undefined;
+  TrailerForm: { trailerId?: string };
+  Drivers: undefined;
+  DriverDetail: { driverId: string };
+  DriverForm: { driverId?: string };
+  Orders: undefined;
+  OrderDetail: { orderId: string };
+  OrderForm: { orderId?: string };
+  Trips: undefined;
+  TripDetail: { tripId: string };
+  TripForm: undefined;
+  Live: undefined;
+  Maintenance: undefined;
+  MaintenanceForm: undefined;
+  Recommendations: undefined;
+  Settings: undefined;
+};
