@@ -1,0 +1,59 @@
+{
+  "expo": {
+    "name": "LOGISTICS@MAHDI Chauffeur",
+    "slug": "logistics-mahdi-driver",
+    "scheme": "logisticsmahdi",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "backgroundColor": "#f4f6f8",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.logisticsmahdi.driver",
+      "infoPlist": {
+        "NSCameraUsageDescription": "L'application utilise la caméra pour photographier les preuves de livraison.",
+        "NSLocationWhenInUseUsageDescription": "L'application utilise votre position pour suivre vos missions en cours."
+      }
+    },
+    "android": {
+      "package": "com.logisticsmahdi.driver",
+      "adaptiveIcon": {
+        "backgroundColor": "#0d5c42",
+        "foregroundImage": "./assets/android-icon-foreground.png"
+      },
+      "predictiveBackGestureEnabled": false,
+      "permissions": [
+        "CAMERA",
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION"
+      ]
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-secure-store",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "L'application utilise la caméra pour photographier les preuves de livraison."
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "L'application utilise votre position pour suivre vos missions en cours."
+        }
+      ],
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash-icon.png",
+          "resizeMode": "contain",
+          "backgroundColor": "#0d5c42"
+        }
+      ]
+    ]
+  }
+}
